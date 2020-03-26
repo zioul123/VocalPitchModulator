@@ -167,7 +167,7 @@ def stft(waveform, win_length=1024, hop_length=512, overlap=.5, window='hann', p
     return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, sample_rate, win_length=1024, hop_length=512, overlap=.5, window='hann', save_file=False):
+def istft(ffts, win_length=1024, hop_length=512, overlap=.5, window='hann', save_file=False):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
