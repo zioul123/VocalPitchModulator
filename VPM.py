@@ -240,6 +240,7 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
         plt.tight_layout()
         plt.show()
 
+
     if not skip_mfcc:
         print("Computing MFCC")
         mfccs = librosa.feature.mfcc(S=librosa.power_to_db(mel_freq_spec))
@@ -251,6 +252,9 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
             plt.title('MFCC')
             plt.tight_layout()
             plt.show()
+
+    # return 2 parameters?
+    return mel_freq_spec, mfccs
 
 # @Zach This is the "Pitch Shift" 
 def simple_fft_pitch_shift(fft, shift_amt):
