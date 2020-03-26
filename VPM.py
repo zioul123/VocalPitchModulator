@@ -188,6 +188,12 @@ def istft(ffts, sample_rate, win_length=1024, overlap=.5, window='hann', save_fi
         waveform (np.array): An array of amplitudes representing a signal.
     """
     waveform_istft = librosa.core.istft(ffts, hop_length=512, win_length=1024, window='hann')
+
+    if save_file:
+        # change the path and file name accordingly
+        i = ''
+        librosa.output.write_wav('output_wav/' + i + '.wav', waveform_istft, sample_rate)
+
     return waveform_istft
 
 # @Rachel/Shaun This is the "Mel Filter 1" and "Mel Filter 2"
