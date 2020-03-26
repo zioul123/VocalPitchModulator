@@ -1,3 +1,92 @@
+import os
+import csv
+
+import scipy.io as sio
+from scipy.io import wavfile
+from scipy.io.wavfile import write
+import scipy.signal as sis
+import scipy.fftpack as fftpack
+
+import numpy as np
+
+def create_data_list(file_path, n_pitches, n_vowels, n_people):
+    """Create a list of all the filenames in the dataset.
+    
+    To access the list of files, use data_list[vowel_idx][pitch_idx]
+    A specific file is accessed with data_list[vowel_idx][pitch_idx][person_idx]
+    
+    Args:
+        filepath (str): The file path to the csv file containing the 
+            filenames of all .wav files
+        n_pitches (int): The number of pitches in our dataset
+        n_vowels (int): The number of vowels in our dataset
+        n_people (int): The number of people in our dataset 
+
+    Returns:
+        data_list (list): A list of filenames, organized by word, then
+            pitch, then people (n_vowels, n_pitches, n_people)
+    """
+    data_list = [ [ [] for pIdx in range(0, n_pitches) ] 
+                 for wIdx in range(0, n_vowels) ]
+
+    with open(file_path) as dataset_csv:
+        reader = csv.reader(dataset_csv, delimiter=',')
+        for idx, row in enumerate(reader):
+            if idx == 0: continue
+            filename, vowel_idx, pitch_idx, personNum = row
+            data_list[int(vowel_idx)][int(pitch_idx)].append(filename)
+    return data_list
+
+def create_data_label_pairs(n_pitches):
+    """Create a dictionary/array of data-label pairs.
+
+    This provides an array of 3-tuples, as well as a dictionary of 
+    arrays, where each subarray contains 3-tuples, with elements: 
+    [shift_amt, input_pitch_idx, label_pitch_Idx],
+    where input_pitch_idx is the input, label_pitch_Idx is the desired output.
+
+    This is used so that we can feed data-label pairs to our neural net.
+    We should use each 3-tuple n_people * n_vowels times, with 
+    the files referenced via data_list[vowel_idx][pitch_idx][person_idx],
+    and the pitch shift amount provided to the NN.
+    
+    Args:
+        n_pitches (int): The number of pitches in our dataset
+
+    Returns:
+        data_label_pairs: An array where each element is a 3-tuple of
+            [shift_amt, input_pitch_idx, label_pitch_idx].
+        data_label_pairs_dict: A dictionary of dimension n_pitchShifts, where each
+            element is an array (n_words * n_startingPitches,), where:
+            n_pitchShifts: the number of possible pitch shifts,
+            n_startingPitches: the number of starting pitches for that 
+            shift_amt value
+    """
+    def append_tuple(shift_amt, pitch_idx):
+        # [shift_amt, input_pitch_idx, label_pitch_Idx]
+        data_label_pairs_dict[shift_amt].append(
+            [shift_amt, pitch_idx, pitch_idx + shift_amt])
+        data_label_pairs.append(
+            [shift_amt, pitch_idx, pitch_idx + shift_amt])
+
+    data_label_pairs = []
+    data_label_pairs_dict = {}
+    for pIdx in range(-n_pitches + 1, n_pitches):
+        data_label_pairs_dict[pIdx] = []
+
+    # Pitch indices range from 0-15, so we can shift from -15 to 15 pitches up.
+    # First loop: shift_amt 0 to 15
+    for shift_amt in range(0, n_pitches):
+        # Iterate through available pitch shift starting points
+        for pitch_idx in range(0, n_pitches - shift_amt):
+            append_tuple(shift_amt, pitch_idx)
+    # Second loop: shift_amt -15 to -1
+    for shift_amt in range(-n_pitches + 1, 0):
+        for pitch_idx in range(n_pitches - 1, -1 - shift_amt, -1):
+            append_tuple(shift_amt, pitch_idx)
+                
+    return data_label_pairs, data_label_pairs_dict
+
 # @Louiz
 def load_wav_files(file_paths):
     """Takes a list of filepaths, and returns a 2D array with all their data.
@@ -117,7 +206,8 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
     Check out librosa.filters.mel if unsure how to write the arguments to call 
     librosa.feature.melspectrogram.
     """
-    if (!skip_mfcc):
+    if not skip_mfcc:
+        print("Computing MFCC")
         """
         !! Write code to compute MFCC here !!
         """
