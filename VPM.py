@@ -169,7 +169,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, win_length=1024, overlap=.5, window='hann'):
+def istft(ffts, sample_rate, win_length=1024, overlap=.5, window='hann', save_file=False):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
@@ -187,9 +187,8 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann'):
     Returns:
         waveform (np.array): An array of amplitudes representing a signal.
     """
-    """
-    !! Write code here !!
-    """
+    waveform_istft = librosa.core.istft(ffts, hop_length=512, win_length=1024, window='hann')
+    return waveform_istft
 
 # @Rachel/Shaun This is the "Mel Filter 1" and "Mel Filter 2"
 def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256, 
