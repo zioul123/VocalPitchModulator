@@ -9,11 +9,15 @@ import scipy.fftpack as fftpack
 
 import numpy as np
 
-def create_data_list(file_path, n_pitches, n_vowels, n_people):
+# Sample rate and bit depth
+sample_rate = 44100
+short_max = 32768
+
+def create_data_ref_list(file_path, n_pitches, n_vowels, n_people):
     """Create a list of all the filenames in the dataset.
     
-    To access the list of files, use data_list[vowel_idx][pitch_idx]
-    A specific file is accessed with data_list[vowel_idx][pitch_idx][person_idx]
+    To access the list of files, use data_ref_list[vowel_idx][pitch_idx]
+    A specific filename is accessed with data_ref_list[vowel_idx][pitch_idx][person_idx]
     
     Args:
         filepath (str): The file path to the csv file containing the 
@@ -23,19 +27,19 @@ def create_data_list(file_path, n_pitches, n_vowels, n_people):
         n_people (int): The number of people in our dataset 
 
     Returns:
-        data_list (list): A list of filenames, organized by word, then
+        data_ref_list (list): A list of filenames, organized by word, then
             pitch, then people (n_vowels, n_pitches, n_people)
     """
-    data_list = [ [ [] for pIdx in range(0, n_pitches) ] 
-                 for wIdx in range(0, n_vowels) ]
+    data_ref_list = [ [ [] for pIdx in range(0, n_pitches) ] 
+                      for wIdx in range(0, n_vowels) ]
 
     with open(file_path) as dataset_csv:
         reader = csv.reader(dataset_csv, delimiter=',')
         for idx, row in enumerate(reader):
             if idx == 0: continue
             filename, vowel_idx, pitch_idx, personNum = row
-            data_list[int(vowel_idx)][int(pitch_idx)].append(filename)
-    return data_list
+            data_ref_list[int(vowel_idx)][int(pitch_idx)].append(filename)
+    return data_ref_list
 
 def create_data_label_pairs(n_pitches):
     """Create a dictionary/array of data-label pairs.
@@ -87,13 +91,14 @@ def create_data_label_pairs(n_pitches):
                 
     return data_label_pairs, data_label_pairs_dict
 
-# @Louiz
-def load_wav_files(file_paths):
+def load_wav_files(rel_path, data_list):
     """Takes a list of filepaths, and returns a 2D array with all their data.
 
     The function also ensures that the resulting array only contains mono data.
     
     Args:
+        rel_path (str): The relative path of the filenames in file_paths.
+            i.e. the filepath would be rel_path/file_paths[i]
         file_paths (list): A list of filenames, where each filename is a 
             .wav file to be added to the output.
 
@@ -103,10 +108,13 @@ def load_wav_files(file_paths):
             signal_data[i] provides the waveform of the ith file in file_paths.
             The dimensions are (len(file_paths), [length of file at filepath])
     """
-    assert(file_path[-4:] == '.wav')
-    """
-    !! Write code here !!
-    """
+    result = []
+    for idx, file_path in enumerate(data_list):
+        assert(file_path[-4:] == '.wav')
+        s_r, short_data = sio.wavfile.read(os.path.join(rel_path,file_path))
+        assert(s_r == sample_rate)
+        result.append(short_data / short_max)
+    return np.array(result)
 
 # @Rachel/Shaun For your use
 def compute_hop_length(win_length, overlap):
@@ -148,6 +156,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann'):
     """
     !! Write code here !!
     """
+    return np.zeros((win_length, int(len(waveform) / win_length * 2 + 1)))
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
 def istft(ffts, win_length=1024, overlap=.5, window='hann'):
