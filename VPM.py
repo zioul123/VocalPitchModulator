@@ -8,6 +8,9 @@ import scipy.signal as sis
 import scipy.fftpack as fftpack
 
 import numpy as np
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
 
 # Sample rate and bit depth
 sample_rate = 44100
@@ -134,7 +137,7 @@ def compute_hop_length(win_length, overlap):
     """
 
 # @Rachel/Shaun, this is the whole "Basic Preprocessing" part
-def stft(waveform, win_length=1024, overlap=.5, window='hann'):
+def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     """Takes a waveform and returns a 2D complex-valued matrix (spectrogram).
     
     The function performs STFT, i.e. windowing and performing FFT on each 
@@ -153,10 +156,17 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann'):
             np.angle(ffts[f, t]) is the phase
             The dimensions are (win_length, [number of frames for waveform])
     """
-    """
-    !! Write code here !!
-    """
-    return np.zeros((win_length, int(len(waveform) / win_length * 2 + 1)))
+    waveform_norm = librosa.util.normalize(waveform)
+    waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=(win_length*overlap), win_length=win_length, window=window)
+
+    if plot:
+        librosa.display.specshow(librosa.amplitude_to_db(waveform_stft, ref=np.max), y_axis='log', x_axis='time')
+        plt.title('Power spectrogram')
+        plt.colorbar(format='%+2.0f dB')
+        plt.tight_layout()
+        plt.show()
+
+    return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
 def istft(ffts, win_length=1024, overlap=.5, window='hann'):
