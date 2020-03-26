@@ -132,12 +132,10 @@ def compute_hop_length(win_length, overlap):
     Returns:
         hop_length (int): The computed hop_length.
     """
-    """
-    !! Write code here !!
-    """
+    return win_length*overlap
 
 # @Rachel/Shaun, this is the whole "Basic Preprocessing" part
-def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
+def stft(waveform, win_length=1024, hop_length=512, overlap=.5, window='hann', plot=True):
     """Takes a waveform and returns a 2D complex-valued matrix (spectrogram).
     
     The function performs STFT, i.e. windowing and performing FFT on each 
@@ -157,7 +155,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
             The dimensions are (win_length, [number of frames for waveform])
     """
     waveform_norm = librosa.util.normalize(waveform)
-    waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=(win_length*overlap), win_length=win_length, window=window)
+    waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=hop_length, win_length=win_length, window=window)
 
     if plot:
         librosa.display.specshow(librosa.amplitude_to_db(waveform_stft, ref=np.max), y_axis='log', x_axis='time')
@@ -169,7 +167,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, sample_rate, win_length=1024, overlap=.5, window='hann', save_file=False):
+def istft(ffts, sample_rate, win_length=1024, hop_length=512, overlap=.5, window='hann', save_file=False):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
@@ -187,7 +185,7 @@ def istft(ffts, sample_rate, win_length=1024, overlap=.5, window='hann', save_fi
     Returns:
         waveform (np.array): An array of amplitudes representing a signal.
     """
-    waveform_istft = librosa.core.istft(ffts, hop_length=512, win_length=1024, window='hann')
+    waveform_istft = librosa.core.istft(ffts, hop_length=hop_length, win_length=win_length, window=window)
 
     if save_file:
         # change the path and file name accordingly
