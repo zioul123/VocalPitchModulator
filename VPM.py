@@ -146,7 +146,8 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
         win_length (int): The size of each window (and corresponding FFT)
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
-        window (str): The window to use, specified by scipy.signal.get_window. 
+        window (str): The window to use, specified by scipy.signal.get_window.
+        plot (bool): A boolean to specify plotting of the spectrogram.
 
     Returns:
         ffts (np.ndarray): A 2D complex-valued matrix such that
@@ -168,7 +169,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False):
+def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, file_name=''):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
@@ -181,7 +182,9 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False):
         win_length (int): The size of each window (and corresponding FFT)
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
-        window (str): The window to use, specified by scipy.signal.get_windo
+        window (str): The window to use, specified by scipy.signal.get_window
+        save_file (bool): A boolean to specify saving of waveform to audio wav file.
+        file_name (str): The respective file name for the audio wav file.
 
     Returns:
         waveform (np.array): An array of amplitudes representing a signal.
@@ -191,8 +194,7 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False):
 
     if save_file:
         # change the path and file name accordingly
-        i = ''
-        librosa.output.write_wav('output_wav/' + i + '.wav', waveform_istft, sample_rate)
+        librosa.output.write_wav('output_wav/' + file_name + '.wav', waveform_istft, sample_rate)
 
     return waveform_istft
 
