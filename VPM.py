@@ -200,8 +200,8 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, fil
     return waveform_istft
 
 # @Rachel/Shaun This is the "Mel Filter 1" and "Mel Filter 2"
-def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
-    n_mfcc=20, skip_mfcc=False):
+def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256, 
+    n_mfcc=20, skip_mfcc=False, plot=False):
     """Converts a spectrogram to a mel-spectrogram and MFCC.
 
     This function is a wrapper for librosa.feature.melspectrogram and
@@ -233,11 +233,33 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
     Check out librosa.filters.mel if unsure how to write the arguments to call
     librosa.feature.melspectrogram.
     """
+    D = np.abs(ffts) ** 2
+    mel_freq_spec = librosa.feature.melspectrogram(S=D, sr=sample_rate, n_mels=n_mels)
+
+    if plot:
+        plt.figure(figsize=(10, 4))
+        S_dB = librosa.power_to_db(mel_freq_spec, ref=np.max)
+        librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=sample_rate/2.0)
+        plt.colorbar(format='%+2.0f dB')
+        plt.title('Mel-frequency spectrogram')
+        plt.tight_layout()
+        plt.show()
+
+
     if not skip_mfcc:
-        print("Computing MFCC")
-        """
-        !! Write code to compute MFCC here !!
-        """
+        mfccs = librosa.feature.mfcc(S=librosa.power_to_db(mel_freq_spec), sr=sample_rate, n_mfcc=n_mfcc)
+
+        if plot:
+            plt.figure(figsize=(10,4))
+            librosa.display.specshow(mfccs, x_axis='time')
+            plt.colorbar()
+            plt.title('MFCC')
+            plt.tight_layout()
+            plt.show()
+
+        return mel_freq_spec, mfccs
+
+    return mel_freq_spec
 
 # @Zach This is the "Pitch Shift"
 def simple_fft_pitch_shift(fft, shift_amt):
