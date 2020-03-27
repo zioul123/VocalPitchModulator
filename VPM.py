@@ -135,7 +135,7 @@ def compute_hop_length(win_length, overlap):
     return int(win_length * (1 - overlap))
 
 # @Rachel/Shaun, this is the whole "Basic Preprocessing" part
-def stft(waveform, win_length=1024, hop_length=512, overlap=.5, window='hann', plot=True):
+def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     """Takes a waveform and returns a 2D complex-valued matrix (spectrogram).
     
     The function performs STFT, i.e. windowing and performing FFT on each 
