@@ -120,7 +120,6 @@ def load_wav_files(rel_path, data_list):
         result.append(short_data / short_max)
     return np.array(result)
 
-# @Rachel/Shaun For your use
 def compute_hop_length(win_length, overlap):
     """Utility function to compute the hop_length.
 
@@ -135,7 +134,6 @@ def compute_hop_length(win_length, overlap):
     """
     return int(win_length * (1 - overlap))
 
-# @Rachel/Shaun, this is the whole "Basic Preprocessing" part
 def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     """Takes a waveform and returns a 2D complex-valued matrix (spectrogram).
 
@@ -161,15 +159,10 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=hop_length, win_length=win_length, window=window)
 
     if plot:
-        librosa.display.specshow(librosa.amplitude_to_db(waveform_stft, ref=np.max), y_axis='log', x_axis='time')
-        plt.title('Power spectrogram')
-        plt.colorbar(format='%+2.0f dB')
-        plt.tight_layout()
-        plt.show()
+        plot_ffts_spectrogram(waveform_stft, sample_rate)
 
     return waveform_stft
 
-# @Rachel/Shaun, this is the whole "Postprocess" part
 def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, file_name=''):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
@@ -199,8 +192,7 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, fil
 
     return waveform_istft
 
-# @Rachel/Shaun This is the "Mel Filter 1" and "Mel Filter 2"
-def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256, 
+def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=128, 
     n_mfcc=20, skip_mfcc=False, plot=False):
     """Converts a spectrogram to a mel-spectrogram and MFCC.
 
@@ -237,31 +229,18 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
     mel_freq_spec = librosa.feature.melspectrogram(S=D, sr=sample_rate, n_mels=n_mels)
 
     if plot:
-        plt.figure(figsize=(10, 4))
-        S_dB = librosa.power_to_db(mel_freq_spec, ref=np.max)
-        librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=sample_rate/2.0)
-        plt.colorbar(format='%+2.0f dB')
-        plt.title('Mel-frequency spectrogram')
-        plt.tight_layout()
-        plt.show()
-
+        plot_mel_spectrogram(mel_freq_spec, sample_rate)
 
     if not skip_mfcc:
         mfccs = librosa.feature.mfcc(S=librosa.power_to_db(mel_freq_spec), sr=sample_rate, n_mfcc=n_mfcc)
 
         if plot:
-            plt.figure(figsize=(10,4))
-            librosa.display.specshow(mfccs, x_axis='time')
-            plt.colorbar()
-            plt.title('MFCC')
-            plt.tight_layout()
-            plt.show()
+            plot_mfcc(mfccs, sample_rate)
 
         return mel_freq_spec, mfccs
 
     return mel_freq_spec
 
-# @Zach This is the "Pitch Shift"
 def simple_fft_pitch_shift(fft, shift_amt):
     """Takes a single fft vector and shifts all values in the frequency domain.
 
