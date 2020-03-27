@@ -147,7 +147,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
         window (str): The window to use, specified by scipy.signal.get_window.
-        plot (bool): A boolean to specify plotting of the spectrogram.
+        plot (bool): If true, plot the spectrogram.
 
     Returns:
         ffts (np.ndarray): A 2D complex-valued matrix such that
@@ -183,7 +183,7 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, fil
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
         window (str): The window to use, specified by scipy.signal.get_window
-        save_file (bool): A boolean to specify saving of waveform to audio wav file.
+        save_file (bool): If true, save of waveform to audio wav file.
         file_name (str): The respective file name for the audio wav file.
 
     Returns:
