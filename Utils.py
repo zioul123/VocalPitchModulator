@@ -3,6 +3,10 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 
+#################################################################
+# 3D to flattened array utilities
+#################################################################
+
 def flatten_3d_array(arr, i_lim, j_lim, k_lim):
     """Takes a 3d array, and returns a 1d array.
 
@@ -54,9 +58,9 @@ def nd_array_idx(idx, i_lim, j_lim, k_lim):
         Three ints representing the i, j, k index to access the
             original 3d array.
     """
-    return np.floor(idx / (j_lim * k_lim)), \
-           np.floor((idx % (j_lim * k_lim)) / k_lim), \
-           np.floor(idx % (k_lim))
+    return int(idx / (j_lim * k_lim)), \
+           int((idx % (j_lim * k_lim)) / k_lim), \
+           int(idx % (k_lim))
 
 #################################################################
 # Graphing utilities

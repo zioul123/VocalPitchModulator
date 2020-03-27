@@ -117,6 +117,9 @@ def load_wav_files(rel_path, data_list):
         assert(file_path[-4:] == '.wav')
         s_r, short_data = sio.wavfile.read(os.path.join(rel_path,file_path))
         assert(s_r == sample_rate)
+        # Make it mono if it's stereo
+        if len(short_data.shape) == 2 and short_data.shape[1] == 2:
+            short_data = short_data[:, 0]
         result.append(short_data / short_max)
     return np.array(result)
 
