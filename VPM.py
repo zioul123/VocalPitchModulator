@@ -9,6 +9,9 @@ import scipy.fftpack as fftpack
 
 import librosa
 import numpy as np
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
 
 # Sample rate and bit depth
 sample_rate = 44100
@@ -130,12 +133,10 @@ def compute_hop_length(win_length, overlap):
     Returns:
         hop_length (int): The computed hop_length.
     """
-    """
-    !! Write code here !!
-    """
+    return int(win_length * (1 - overlap))
 
 # @Rachel/Shaun, this is the whole "Basic Preprocessing" part
-def stft(waveform, win_length=1024, overlap=.5, window='hann'):
+def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     """Takes a waveform and returns a 2D complex-valued matrix (spectrogram).
 
     The function performs STFT, i.e. windowing and performing FFT on each
@@ -147,6 +148,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann'):
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
         window (str): The window to use, specified by scipy.signal.get_window.
+        plot (bool): If true, plot the spectrogram.
 
     Returns:
         ffts (np.ndarray): A 2D complex-valued matrix such that
@@ -154,13 +156,21 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann'):
             np.angle(ffts[f, t]) is the phase
             The dimensions are (win_length, [number of frames for waveform])
     """
-    """
-    !! Write code here !!
-    """
-    return np.zeros((win_length, int(len(waveform) / win_length * 2 + 1)))
+    waveform_norm = librosa.util.normalize(waveform)
+    hop_length = compute_hop_length(win_length, overlap)
+    waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=hop_length, win_length=win_length, window=window)
+
+    if plot:
+        librosa.display.specshow(librosa.amplitude_to_db(waveform_stft, ref=np.max), y_axis='log', x_axis='time')
+        plt.title('Power spectrogram')
+        plt.colorbar(format='%+2.0f dB')
+        plt.tight_layout()
+        plt.show()
+
+    return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, win_length=1024, overlap=.5, window='hann'):
+def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, file_name=''):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
@@ -173,14 +183,21 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann'):
         win_length (int): The size of each window (and corresponding FFT)
         overlap (float): The amount of overlap between each window. This
             translates to the hop_length.
-        window (str): The window to use, specified by scipy.signal.get_windo
+        window (str): The window to use, specified by scipy.signal.get_window
+        save_file (bool): If true, save of waveform to audio wav file.
+        file_name (str): The respective file name for the audio wav file.
 
     Returns:
         waveform (np.array): An array of amplitudes representing a signal.
     """
-    """
-    !! Write code here !!
-    """
+    hop_length = compute_hop_length(win_length, overlap)
+    waveform_istft = librosa.core.istft(ffts, hop_length=hop_length, win_length=win_length, window=window)
+
+    if save_file:
+        # change the path and file name accordingly
+        librosa.output.write_wav('output_wav/' + file_name + '.wav', waveform_istft, sample_rate)
+
+    return waveform_istft
 
 # @Rachel/Shaun This is the "Mel Filter 1" and "Mel Filter 2"
 def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
