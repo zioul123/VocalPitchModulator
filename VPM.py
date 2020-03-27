@@ -257,7 +257,7 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=256,
             plt.tight_layout()
             plt.show()
 
-            return mel_freq_spec, mfccs
+        return mel_freq_spec, mfccs
 
     return mel_freq_spec
 
