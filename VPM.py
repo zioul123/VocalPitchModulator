@@ -132,7 +132,7 @@ def compute_hop_length(win_length, overlap):
     Returns:
         hop_length (int): The computed hop_length.
     """
-    return win_length*overlap
+    return int(win_length * (1 - overlap))
 
 # @Rachel/Shaun, this is the whole "Basic Preprocessing" part
 def stft(waveform, win_length=1024, hop_length=512, overlap=.5, window='hann', plot=True):
