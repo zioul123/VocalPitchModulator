@@ -259,7 +259,7 @@ def simple_fft_pitch_shift(fft, shift_amt):
     """
     assert(-15 <= shift_amt and shift_amt <= 15)
 
-    freqs = librosa.core.fft_frequencies(44100,1024)
+    freqs = librosa.core.fft_frequencies(sample_rate,1024)
     shifted_freqs = freqs * np.power(2, shift_amt/12)
     shifted_fft = np.interp(freqs, shifted_freqs, fft)
 
