@@ -155,6 +155,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
             The dimensions are (win_length, [number of frames for waveform])
     """
     waveform_norm = librosa.util.normalize(waveform)
+    hop_length = compute_hop_length(win_length, overlap)
     waveform_stft = librosa.core.stft(waveform_norm, n_fft=win_length, hop_length=hop_length, win_length=win_length, window=window)
 
     if plot:
@@ -167,7 +168,7 @@ def stft(waveform, win_length=1024, overlap=.5, window='hann', plot=True):
     return waveform_stft
 
 # @Rachel/Shaun, this is the whole "Postprocess" part
-def istft(ffts, win_length=1024, hop_length=512, overlap=.5, window='hann', save_file=False):
+def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False):
     """Takes a 2D complex-valued matrix (spectrogram) and returns a waveform.
 
     This function performs ISTFT, and is a wrapper for librosa.core.istft.
@@ -185,6 +186,7 @@ def istft(ffts, win_length=1024, hop_length=512, overlap=.5, window='hann', save
     Returns:
         waveform (np.array): An array of amplitudes representing a signal.
     """
+    hop_length = compute_hop_length(win_length, overlap)
     waveform_istft = librosa.core.istft(ffts, hop_length=hop_length, win_length=win_length, window=window)
 
     if save_file:
