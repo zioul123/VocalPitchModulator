@@ -19,17 +19,18 @@ from matplotlib.pyplot import subplots
 from Utils import *
 
 class TimbreEncoder(nn.Module):
+    """This neural network attempts to identify a vowel, given an MFCC."""
     
-    def __init__(self, n_mfcc=20, n_hid1=12, n_timb=4, n_vowels=12):
+    def __init__(self, n_mfcc=20, n_hid=12, n_timb=4, n_vowels=12):
         super().__init__()
         torch.manual_seed(0)
         self.net = nn.Sequential(
             # nn.Linear(n_mfcc, n_timb), 
             nn.Linear(n_mfcc, n_mfcc), 
             nn.ReLU(), 
-            nn.Linear(n_mfcc, n_hid1), 
+            nn.Linear(n_mfcc, n_hid), 
             nn.ReLU(), 
-            nn.Linear(n_hid1, n_timb), 
+            nn.Linear(n_hid, n_timb), 
             nn.ReLU(),
             nn.Linear(n_timb, n_vowels),
             nn.Softmax())

@@ -24,7 +24,7 @@ def flatten_3d_array(arr, i_lim, j_lim, k_lim):
               for j in range(j_lim) 
               for k in range(k_lim) ]
 
-def flat_array_idx(i, j, k, i_lim, j_lim, k_lim):
+def flat_3d_array_idx(i, j, k, i_lim, j_lim, k_lim):
     """Used to get the index of flattened arrays as a 3d arrays.
     
     This is used to access arrays that have been flattened
@@ -42,6 +42,14 @@ def flat_array_idx(i, j, k, i_lim, j_lim, k_lim):
             in the original 3d array.
     """
     return i * j_lim * k_lim + j * k_lim + k
+
+def flat_2d_array_idx(i, j, i_lim, j_lim):
+    """Analogous to flat_array_idx, except for 2d arrays.
+    
+    Args and Return: 
+        See above.
+    """
+    return i * j_lim + j
 
 def nd_array_idx(idx, i_lim, j_lim, k_lim):
     """Used to get the 3d index from a flat array index.
