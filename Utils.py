@@ -159,3 +159,37 @@ def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None)
     if val_acc_arr != None:
         print('Validation accuracy before/after: {}, {}'
               .format(val_acc_arr[0], val_acc_arr[-1]))
+
+#################################################################
+# Normalization utilities
+#################################################################
+
+class NormMode(IntEnum):
+    REAL_TO_ZERO_ONE = 0
+    REAL_TO_NEG_ONE_ONE = 1
+    NEG_ONE_ONE_TO_ZERO_ONE = 2
+
+def normalize_rows(mat, norm_mode):
+    """This function normalizes each row of mat.
+    
+    We normalize along the rows, so e.g.
+    [ [1, -5, 3 ],      [ [0.2, -1, 0.6 ], 
+      [3, -3, 1 ],  -->   [1, -1, 0.333 ],
+      [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]
+
+    Args:
+        mat (np.ndarray): An array of arrays where mat[r] is the rth row.
+        norm_mode(NormMode): Which normalization mode to use.
+            REAL_TO_ZERO_ONE: Normalize real values to [0, 1]
+            REAL_TO_NEG_ONE_ONE: Normalize real values to [-1, 1]
+            NEG_ONE_ONE_TO_ZERO_ONE: Normalize [-1, 1] to [0, 1]
+    Returns:
+        normed_mat (np.ndarray): The normalized matrix.
+    """
+    if norm_mode == NormMode.REAL_TO_ZERO_ONE:
+        normed_mat = librosa.util.normalize(mat, axis=1)
+        return normed_mat / 2 + 0.5
+    if norm_mode == NormMode.REAL_TO_NEG_ONE_ONE:
+        return librosa.util.normalize(mat, axis=1)
+    if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
+        return mat / 2 + 0.5

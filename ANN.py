@@ -20,36 +20,6 @@ from enum import IntEnum
 
 from Utils import *
 
-class NormMode(IntEnum):
-    REAL_TO_ZERO_ONE = 0
-    REAL_TO_NEG_ONE_ONE = 1
-    NEG_ONE_ONE_TO_ZERO_ONE = 2
-
-def normalize_rows(mat, norm_mode):
-    """This function normalizes each row of mat.
-    
-    We normalize along the rows, so e.g.
-    [ [1, -5, 3 ],      [ [0.2, -1, 0.6 ], 
-      [3, -3, 1 ],  -->   [1, -1, 0.333 ],
-      [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]
-
-    Args:
-        mat (np.ndarray): An array of arrays where mat[r] is the rth row.
-        norm_mode(NormMode): Which normalization mode to use.
-            REAL_TO_ZERO_ONE: Normalize real values to [0, 1]
-            REAL_TO_NEG_ONE_ONE: Normalize real values to [-1, 1]
-            NEG_ONE_ONE_TO_ZERO_ONE: Normalize [-1, 1] to [0, 1]
-    Returns:
-        normed_mat (np.ndarray): The normalized matrix.
-    """
-    if norm_mode == NormMode.REAL_TO_ZERO_ONE:
-        normed_mat = librosa.util.normalize(mat, axis=1)
-        return normed_mat / 2 + 0.5
-    if norm_mode == NormMode.REAL_TO_NEG_ONE_ONE:
-        return librosa.util.normalize(mat, axis=1)
-    if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
-        return mat / 2 + 0.5
-
 class TimbreEncoder(nn.Module):
     """This neural network attempts to identify a vowel, given an MFCC."""
     
@@ -133,18 +103,6 @@ class TimbreVAE(nn.Module):
         self.en_std  = nn.Linear(n_hid, n_timb) 
         self.de1     = nn.Linear(n_timb, n_hid)
         self.de2     = nn.Linear(n_hid, n_mfcc)
-
-        # nn.init.normal_(self.en1.weight, std=0.08)
-        # nn.init.normal_(self.en_mu.weight, std=0.08)
-        # nn.init.normal_(self.en_std.weight, std=0.08)
-        # nn.init.normal_(self.de1.weight, std=0.08)
-        # nn.init.normal_(self.de2.weight, std=0.08)
-        # nn.init.normal_(self.en1.bias, std=0.08)
-        # nn.init.normal_(self.en_mu.bias, std=0.08)
-        # nn.init.normal_(self.en_std.bias, std=0.08)
-        # nn.init.normal_(self.de1.bias, std=0.08)
-        # nn.init.normal_(self.de2.bias, std=0.08)
-
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
         self.sigmoid = nn.Sigmoid()
