@@ -21,6 +21,9 @@ The following illustrates the organization of our data.
 ![Data-Label Pairs](/Documentation/Figures/Data-Label_Pairs.png)
 
 ## Training Pipeline
-The following illustrates the training pipelines for the encoder and decoders:  
-![Encoder Training Pipeline](/Documentation/Figures/Timbre-Enc_Training.png)  
+The following illustrates the training pipelines for the encoder and decoders. There are two possible timbre-extrating neural nets we attempted. The first is a classifier which takes MFCC and tries to output the vowel label, while the other is an autoencoder which takes an MFCC, reduces it from 20 to 4 dimensions, and attempts to reconstruct the original MFCC.
+![Encoder Training Pipeline](/Documentation/Figures/Timbre-Enc_Training.png)
+![TimbreVAE Training Pipeline](/Documentation/Figures/Timbre-VAE_Training.png)
+
+This is the proposed decoder that makes use of the Timbre encoder:
 ![Decoder Training Pipeline](/Documentation/Figures/Decoder_Training.png)
