@@ -126,26 +126,36 @@ def plot_mfcc(mfccs, sample_rate, file_name=None):
     plt.tight_layout()
     plt.show()
 
-def plot_loss_graph(loss_arr, acc_arr, val_acc_arr):
+def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None):
     """This function is used to plot the loss graph of the fit function.
     
     Args:
         loss_arr (list): An array of floats for training loss at each epoch.
+        val_loss_arr (list): An array of floats for validation loss at each epoch.
         acc_arr (list): An array of floats for training accuracy at each epoch.
         val_acc_arr (list): An array of floats for validation acc at each epoch.
     """
 
     plt.figure(figsize=(15, 10))
     plt.plot(loss_arr, 'r-', label='loss')
-    plt.plot(acc_arr, 'b-', label='train accuracy')
-    plt.plot(val_acc_arr, 'g-', label='val accuracy')
+    if val_loss_arr != None:
+        plt.plot(val_loss_arr, 'm-', label='train accuracy')
+    if acc_arr != None:
+        plt.plot(acc_arr, 'b-', label='train accuracy')
+    if val_acc_arr != None:
+        plt.plot(val_acc_arr, 'g-', label='val accuracy')
     plt.title("Loss plot")
     plt.xlabel("Epoch")
     plt.legend(loc='best')
     plt.show()
-    print('Loss before/after: {}, {}'
+    print('Training Loss before/after: {}, {}'
           .format(loss_arr[0], loss_arr[-1]))
-    print('Training accuracy before/after: {}, {}'
-          .format(acc_arr[0], acc_arr[-1]))
-    print('Validation accuracy before/after: {}, {}'
-          .format(val_acc_arr[0], val_acc_arr[-1]))
+    if val_loss_arr != None:
+        print('Validation Loss before/after: {}, {}'
+              .format(val_loss_arr[0], val_loss_arr[-1]))
+    if acc_arr != None:
+        print('Training accuracy before/after: {}, {}'
+              .format(acc_arr[0], acc_arr[-1]))
+    if val_acc_arr != None:
+        print('Validation accuracy before/after: {}, {}'
+              .format(val_acc_arr[0], val_acc_arr[-1]))
