@@ -16,8 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import subplots
 
-from enum import IntEnum
-
 from Utils import *
 
 class TimbreEncoder(nn.Module):
