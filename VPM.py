@@ -13,6 +13,8 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 
+from Utils import *
+
 # Sample rate and bit depth
 sample_rate = 44100
 short_max = 32768

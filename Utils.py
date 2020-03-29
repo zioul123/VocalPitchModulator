@@ -24,7 +24,7 @@ def flatten_3d_array(arr, i_lim, j_lim, k_lim):
               for j in range(j_lim) 
               for k in range(k_lim) ]
 
-def flat_array_idx(i, j, k, i_lim, j_lim, k_lim):
+def flat_3d_array_idx(i, j, k, i_lim, j_lim, k_lim):
     """Used to get the index of flattened arrays as a 3d arrays.
     
     This is used to access arrays that have been flattened
@@ -42,6 +42,14 @@ def flat_array_idx(i, j, k, i_lim, j_lim, k_lim):
             in the original 3d array.
     """
     return i * j_lim * k_lim + j * k_lim + k
+
+def flat_2d_array_idx(i, j, i_lim, j_lim):
+    """Analogous to flat_array_idx, except for 2d arrays.
+    
+    Args and Return: 
+        See above.
+    """
+    return i * j_lim + j
 
 def nd_array_idx(idx, i_lim, j_lim, k_lim):
     """Used to get the 3d index from a flat array index.
@@ -117,3 +125,71 @@ def plot_mfcc(mfccs, sample_rate, file_name=None):
     plt.title('MFCC')
     plt.tight_layout()
     plt.show()
+
+def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None):
+    """This function is used to plot the loss graph of the fit function.
+    
+    Args:
+        loss_arr (list): An array of floats for training loss at each epoch.
+        val_loss_arr (list): An array of floats for validation loss at each epoch.
+        acc_arr (list): An array of floats for training accuracy at each epoch.
+        val_acc_arr (list): An array of floats for validation acc at each epoch.
+    """
+
+    plt.figure(figsize=(15, 10))
+    plt.plot(loss_arr, 'r-', label='loss')
+    if val_loss_arr != None:
+        plt.plot(val_loss_arr, 'm-', label='train accuracy')
+    if acc_arr != None:
+        plt.plot(acc_arr, 'b-', label='train accuracy')
+    if val_acc_arr != None:
+        plt.plot(val_acc_arr, 'g-', label='val accuracy')
+    plt.title("Loss plot")
+    plt.xlabel("Epoch")
+    plt.legend(loc='best')
+    plt.show()
+    print('Training Loss before/after: {}, {}'
+          .format(loss_arr[0], loss_arr[-1]))
+    if val_loss_arr != None:
+        print('Validation Loss before/after: {}, {}'
+              .format(val_loss_arr[0], val_loss_arr[-1]))
+    if acc_arr != None:
+        print('Training accuracy before/after: {}, {}'
+              .format(acc_arr[0], acc_arr[-1]))
+    if val_acc_arr != None:
+        print('Validation accuracy before/after: {}, {}'
+              .format(val_acc_arr[0], val_acc_arr[-1]))
+
+#################################################################
+# Normalization utilities
+#################################################################
+
+class NormMode(IntEnum):
+    REAL_TO_ZERO_ONE = 0
+    REAL_TO_NEG_ONE_ONE = 1
+    NEG_ONE_ONE_TO_ZERO_ONE = 2
+
+def normalize_rows(mat, norm_mode):
+    """This function normalizes each row of mat.
+    
+    We normalize along the rows, so e.g.
+    [ [1, -5, 3 ],      [ [0.2, -1, 0.6 ], 
+      [3, -3, 1 ],  -->   [1, -1, 0.333 ],
+      [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]
+
+    Args:
+        mat (np.ndarray): An array of arrays where mat[r] is the rth row.
+        norm_mode(NormMode): Which normalization mode to use.
+            REAL_TO_ZERO_ONE: Normalize real values to [0, 1]
+            REAL_TO_NEG_ONE_ONE: Normalize real values to [-1, 1]
+            NEG_ONE_ONE_TO_ZERO_ONE: Normalize [-1, 1] to [0, 1]
+    Returns:
+        normed_mat (np.ndarray): The normalized matrix.
+    """
+    if norm_mode == NormMode.REAL_TO_ZERO_ONE:
+        normed_mat = librosa.util.normalize(mat, axis=1)
+        return normed_mat / 2 + 0.5
+    if norm_mode == NormMode.REAL_TO_NEG_ONE_ONE:
+        return librosa.util.normalize(mat, axis=1)
+    if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
+        return mat / 2 + 0.5
