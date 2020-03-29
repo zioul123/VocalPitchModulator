@@ -90,7 +90,7 @@ class TimbreVAE(nn.Module):
     attempts to decode the n_timb-vector to a n_mfcc vector to match the 
     original MFCC.
     """
-    def __init__(self, n_mfcc=20, n_hid=12, n_timb=4, n_vowels=12):
+    def __init__(self, n_mfcc=20, n_hid=12, n_timb=4):
         super().__init__()
         torch.manual_seed(0)
 
@@ -131,7 +131,7 @@ class TimbreVAE(nn.Module):
         mu, logvar = self.encode(x)
         return self.reparam(mu, logvar)
 
-    def train_func(self, x, x_val, model, opt, loss_fn, batch_size=128, epochs=10000, print_graph=False):
+    def train_func(self, x, x_val, model, opt, loss_fn, batch_size=128, epochs=10000, print_graph=False, desc='Training'):
         """Function to train a VAE.
         
         Args:
@@ -154,23 +154,22 @@ class TimbreVAE(nn.Module):
                                                 if (batch_idx < batch_size - 1) else
                                                 x.shape[0])] 
                     for batch_idx in range(n_batches) ]
-        print("Batches created. Shape: {}".format(np.array(batches).shape))
 
         # Loop with progress bar
-        for epoch in trange(epochs, desc='Training'):
+        for epoch in trange(epochs, desc=desc):
             train_loss = 0
             total = 0
             for batch_idx, batch_x in enumerate(batches):
                 opt.zero_grad()
                 recon_x, mu, logvar = model(batch_x)
-                if (epoch % 10 == 0 and batch_idx == 15):
-                    print("Batch sample:", batch_x, recon_x)
+                # if (epoch % 10 == 0 and batch_idx == 15):
+                    # print("Batch sample:", batch_x, recon_x)
                 loss = loss_fn(recon_x, batch_x, mu, logvar)
                 loss.backward()
                 train_loss += loss.item()
                 opt.step()
-            if (epoch % 1000 == 0):
-                print("Loss:", train_loss / x.shape[0])
+            # if (epoch % 1000 == 0):
+                # print("Loss:", train_loss / x.shape[0])
             if print_graph:
                 loss_arr.append(train_loss / x.shape[0])
 
@@ -178,11 +177,14 @@ class TimbreVAE(nn.Module):
                 recon_x, mu, logvar = model(x_val)
                 val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
                 val_loss_arr.append(val_loss / x_val.shape[0])
-                if (epoch % 1000 == 0):
-                    print("Val Loss:", val_loss_arr[-1])
+                # if (epoch % 1000 == 0):
+                    # print("Val Loss:", val_loss_arr[-1])
                 # print("Loss arr:", loss_arr)
         
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
 
-        return train_loss / x.shape[0]
+        # Compute validation loss
+        recon_x, mu, logvar = model(x_val)
+        val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
+        return train_loss / x.shape[0], val_loss
