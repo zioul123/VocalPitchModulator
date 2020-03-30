@@ -188,3 +188,88 @@ class TimbreVAE(nn.Module):
         recon_x, mu, logvar = model(x_val)
         val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
         return train_loss / x.shape[0], val_loss
+
+class TimbreMelDecoder(nn.Module):
+    """This neural network attempts to recreate an FFT, given a mel spectrum and timbre vector"""
+    
+    def __init__(self, n_input=132, n_hid=260, n_hid2=386, n_ffts=513):
+        super().__init__()
+        torch.manual_seed(0)
+        self.n_input  = n_input
+
+        self.fc1     = nn.Linear(n_input, n_hid)
+        self.fc2     = nn.Linear(n_hid, n_hid2)
+        self.fc3     = nn.Linear(n_hid2, n_ffts)
+
+        self.relu    = nn.ReLU()
+        self.Softmax = nn.Softmax()
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, X):
+        return nn.Sequential(
+            self.fc1, 
+            nn.ReLU(), 
+            self.fc2, 
+            nn.ReLU(), 
+            self.fc3, 
+            nn.Sigmoid())
+
+    def train_func(self, x, y, x_val, y_val, model, opt, loss_fn, epochs=10000, print_graph=False):
+        """Generic function for training a classifier.
+        
+        Args:
+            x (torch.Tensor): The training data (N * d), may be on the GPU.
+            y (torch.Tensor): The training labels (N * 1), may be on the GPU.
+            x_val (torch.Tensor): The validation data (V * d), may be on the GPU.
+            y_val (torch.Tensor): The validation data (V * 1), may be on the GPU.
+            model (torch.nn.Module): The model to be trained, may be on the GPU.
+            opt (torch.optim): The optimizer function.
+            loss_fn (function): The loss function. 
+            epochs (int): The number of epochs to perform.
+            print_graph (boolean): Whether or not we want to store the loss/accuracy 
+                per epoch, and plotting a graph.
+        """
+        if print_graph:
+            loss_arr = []; val_loss_arr = []
+        
+        # Actual training
+
+        n_batches = int(np.ceil(x.shape[0] / batch_size))
+        batches = [ x[batch_idx * batch_size : ((batch_idx + 1) * batch_size 
+                                                if (batch_idx < batch_size - 1) else
+                                                x.shape[0])] 
+                    for batch_idx in range(n_batches) ]
+
+        # Loop with progress bar
+        for epoch in trange(epochs, desc=desc):
+            train_loss = 0
+            total = 0
+            for batch_idx, batch_x in enumerate(batches):
+                opt.zero_grad()
+                recon_x, mu, logvar = model(batch_x)
+                # if (epoch % 10 == 0 and batch_idx == 15):
+                    # print("Batch sample:", batch_x, recon_x)
+                loss = loss_fn(recon_x, batch_x, mu, logvar)
+                loss.backward()
+                train_loss += loss.item()
+                opt.step()
+            # if (epoch % 1000 == 0):
+                # print("Loss:", train_loss / x.shape[0])
+            if print_graph:
+                loss_arr.append(train_loss / x.shape[0])
+
+                # Compute validation loss
+                recon_x, mu, logvar = model(x_val)
+                val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
+                val_loss_arr.append(val_loss / x_val.shape[0])
+                # if (epoch % 1000 == 0):
+                    # print("Val Loss:", val_loss_arr[-1])
+                # print("Loss arr:", loss_arr)
+        
+        if print_graph:
+            plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
+
+        # Compute validation loss
+        recon_x, mu, logvar = model(x_val)
+        val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
+        return train_loss / x.shape[0], val_loss
