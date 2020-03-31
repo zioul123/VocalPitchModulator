@@ -167,16 +167,17 @@ def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None)
 
 class NormMode(IntEnum):
     REAL_TO_ZERO_ONE = 0
-    REAL_TO_NEG_ONE_ONE = 1
-    NEG_ONE_ONE_TO_ZERO_ONE = 2
+    NONNEG_TO_ZERO_ONE = 1
+    REAL_TO_NEG_ONE_ONE = 2
+    NEG_ONE_ONE_TO_ZERO_ONE = 3
 
 def normalize_rows(mat, norm_mode):
-    """This function normalizes each row of mat.
+    """This function normalizes each row of mat, and returns the normalizing factors.
     
     We normalize along the rows, so e.g.
-    [ [1, -5, 3 ],      [ [0.2, -1, 0.6 ], 
-      [3, -3, 1 ],  -->   [1, -1, 0.333 ],
-      [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]
+    [ [1, -5, 3 ],      [ [0.2, -1, 0.6 ],       [ 5, 
+      [3, -3, 1 ],  -->   [1, -1, 0.333 ],  and    3,
+      [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]        4 ]
 
     Args:
         mat (np.ndarray): An array of arrays where mat[r] is the rth row.
@@ -186,11 +187,19 @@ def normalize_rows(mat, norm_mode):
             NEG_ONE_ONE_TO_ZERO_ONE: Normalize [-1, 1] to [0, 1]
     Returns:
         normed_mat (np.ndarray): The normalized matrix.
+        norm_vec (np.array): A vector of factors, which can be used as a divisor to
+            normed_mat to retrieve the original matrix scale. Note that this 
+            is only returned for modes other than NEG_ONE_ONE_TO_ZERO_ONE, where
+            there's no real scale involved.
+
     """
     if norm_mode == NormMode.REAL_TO_ZERO_ONE:
         normed_mat = librosa.util.normalize(mat, axis=1)
-        return normed_mat / 2 + 0.5
-    if norm_mode == NormMode.REAL_TO_NEG_ONE_ONE:
-        return librosa.util.normalize(mat, axis=1)
+        scale_factors = normed_mat[:, 0] / mat[:, 0]
+        return normed_mat / 2 + 0.5, scale_factors
+    if norm_mode == NormMode.REAL_TO_NEG_ONE_ONE or norm_mode == NormMode.NONNEG_TO_ZERO_ONE:
+        normed_mat = librosa.util.normalize(mat, axis=1)
+        scale_factors = normed_mat[:, 0] / mat[:, 0]
+        return normed_mat, scale_factors
     if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
         return mat / 2 + 0.5
