@@ -26,18 +26,12 @@ class PitchShiftNN(nn.Module):
         super().__init__()
         torch.manual_seed(0)
 
-        self.input   = nn.Linear(n_input, n_hid)
-        self.hidden1  = nn.Linear(n_hid, n_hid)
-        self.hidden2  = nn.Linear(n_hid, n_hid)
-        self.output  = nn.Linear(n_hid, n_output)
+        self.output  = nn.Linear(n_input, n_output)
         self.relu    = nn.ReLU()
-        self.lrelu    = nn.LeakyReLU()
+        self.tanh    = nn.Tanh()
 
     def forward(self, x):
-        h1 = self.lrelu(self.input(x))
-        h2 = self.lrelu(self.hidden1(h1))
-        h3 = self.lrelu(self.hidden2(h2))
-        return self.relu(self.output(h3))
+        return self.tanh(self.relu(self.output(x)))
 
     def train_func(self, x, y, x_val, y_val, model, opt, loss_fn, epochs=10000, print_graph=False):
         print(x.shape)
