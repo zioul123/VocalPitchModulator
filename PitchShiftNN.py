@@ -55,12 +55,13 @@ class PitchShiftNN(nn.Module):
                 per epoch, and plotting a graph.
         """
         # Function to calculate accuracy of model, for graphing purposes
-        def accuracy(y_hat, y):
-            return (torch.norm(y-y_hat,p=1,dim=1)).float().mean()
+        # def accuracy(y_hat, y):
+        #    return torch.dist(y_hat, y, p=2)
         
         # Function/structures to log the current timestep
         if print_graph:
             loss_arr = []; acc_arr = []; val_acc_arr = [];
+            
         def record_loss(_loss, _acc, _val_acc):
             loss_arr.append(_loss)
             acc_arr.append(_acc)
@@ -72,12 +73,12 @@ class PitchShiftNN(nn.Module):
         for epoch in trange(epochs, desc='Training'):
             opt.zero_grad()
             y_hat = model(x)  
-            loss = loss_fn(y_hat, y) 
+            loss = loss_fn(y_hat, y)
             loss.backward()
             opt.step()
             
             if print_graph:
-                record_loss(loss.item(), accuracy(y_hat, y), accuracy(model(x_val),y_val))
+                record_loss(loss.item(), 0, 0)
         
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, acc_arr=acc_arr, val_acc_arr=val_acc_arr)
