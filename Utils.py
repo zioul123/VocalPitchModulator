@@ -171,6 +171,12 @@ class NormMode(IntEnum):
     REAL_TO_NEG_ONE_ONE = 2
     NEG_ONE_ONE_TO_ZERO_ONE = 3
 
+class DenormMode(IntEnum):
+    ZERO_ONE_TO_REAL = 0
+    ZERO_ONE_TO_NONNEG = 1
+    NEG_ONE_ONE_TO_REAL = 2
+    ZERO_ONE_TO_NEG_ONE_ONE = 3
+
 def normalize_rows(mat, norm_mode):
     """This function normalizes each row of mat, and returns the normalizing factors.
     
@@ -179,10 +185,17 @@ def normalize_rows(mat, norm_mode):
       [3, -3, 1 ],  -->   [1, -1, 0.333 ],  and    3,
       [-2, 4, 3 ] ]       [-0.5, 1, .75 ] ]        4 ]
 
+    Example:
+        To retrieve the original rows, we can use:
+        normed_mat, scales = normalize_rows(mat, NormMode.REAL_TO_ZERO_ONE);
+        original_mat = denormalize_rows(normed_mat, DenormMode.ZERO_ONE_TO_REAL, scales)
+        And original_mat will be identical to mat.
+
     Args:
         mat (np.ndarray): An array of arrays where mat[r] is the rth row.
         norm_mode(NormMode): Which normalization mode to use.
             REAL_TO_ZERO_ONE: Normalize real values to [0, 1]
+            NONNEG_TO_ZERO_ONE: Normalize non-negative values to [0, 1]
             REAL_TO_NEG_ONE_ONE: Normalize real values to [-1, 1]
             NEG_ONE_ONE_TO_ZERO_ONE: Normalize [-1, 1] to [0, 1]
     Returns:
@@ -191,7 +204,6 @@ def normalize_rows(mat, norm_mode):
             normed_mat to retrieve the original matrix scale. Note that this 
             is only returned for modes other than NEG_ONE_ONE_TO_ZERO_ONE, where
             there's no real scale involved.
-
     """
     if norm_mode == NormMode.REAL_TO_ZERO_ONE:
         normed_mat = librosa.util.normalize(mat, axis=1)
@@ -203,3 +215,39 @@ def normalize_rows(mat, norm_mode):
         return normed_mat, scale_factors
     if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
         return mat / 2 + 0.5
+
+def denormalize_rows(mat, denorm_mode, scale_factors=None):
+    """This function denormalizes each row of mat, given an array of scale_factors.
+    
+    We denormalize along the rows, so e.g.
+    [ [0.2, -1, 0.6 ],       [ 5,      [ [1, -5, 3 ],
+      [1, -1, 0.333 ],  and    3,  -->   [3, -3, 1 ],
+      [-0.5, 1, .75 ] ]        4 ]       [-2, 4, 3 ] ]
+
+    Example:
+        To retrieve the original rows, we can use:
+        normed_mat, scales = normalize_rows(mat, NormMode.REAL_TO_ZERO_ONE);
+        original_mat = denormalize_rows(normed_mat, scales, DenormMode.ZERO_ONE_TO_REAL)
+        And original_mat will be identical to mat.
+
+    Args:
+        mat (np.ndarray): An array of arrays where mat[r] is the rth row.
+        norm_mode(NormMode): Which normalization mode to use.
+            ZERO_ONE_TO_REAL: Denormalize values from [0, 1] to real
+            ZERO_ONE_TO_NONNEG: Denormalize values from [0, 1] to non-negative
+            NEG_ONE_ONE_TO_REAL: Denormalize values from [-1, 1] to real
+            ZERO_ONE_TO_NEG_ONE_ONE: Denormalize values from [0, 1] to [-1, 1]
+        scale_factors (np.array): The scale factors to denormalize each row by.
+    Returns:
+        normed_mat (np.ndarray): The normalized matrix
+    """
+    if denorm_mode == DenormMode.ZERO_ONE_TO_REAL:
+        denormed_mat = np.array([ (mat[idx] * 2 - 1) / scale_factors[idx] 
+                                  for idx in range(mat.shape[0]) ])
+        return denormed_mat
+    if denorm_mode == DenormMode.NEG_ONE_ONE_TO_REAL or denorm_mode == DenormMode.ZERO_ONE_TO_NONNEG:
+        denormed_mat = np.array([ mat[idx] / scale_factors[idx] 
+                                  for idx in range(mat.shape[0]) ])
+        return denormed_mat
+    if denorm_mode == DenormMode.ZERO_ONE_TO_NEG_ONE_ONE:
+        return mat * 2 - 1
