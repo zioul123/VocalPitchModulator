@@ -16,7 +16,9 @@ The following is the proposed modulation pipeline:
 ![Modulation Pipeline](/Documentation/Figures/Modulation_Pipeline.png)  
 
 ## Data Organization
-The following illustrates the organization of our data.  
+For a walkthrough of the typical data processing that we conducted, refer to the [Data Processing for Training Walkthrough](https://github.com/zioul123/VocalPitchModulator/blob/master/Data%20Processing%20for%20Training%20Walkthrough.ipynb).
+
+The following are additional aids which illustrates the organization of our data.
 ![Data List](/Documentation/Figures/Data_List.png)  
 ![Data-Label Pairs](/Documentation/Figures/Data-Label_Pairs.png)
 
