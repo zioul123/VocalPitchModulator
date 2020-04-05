@@ -85,6 +85,7 @@ def plot_ffts_spectrogram(ffts, sample_rate, file_name=None):
         sample_rate (int): The sample rate at which the stft was taken.
         file_name (str): To be put into the title of the plot.
     """
+    plt.figure(figsize=(10, 4))
     librosa.display.specshow(librosa.amplitude_to_db(np.abs(ffts), ref=np.max), 
         y_axis='linear', x_axis='time', sr=sample_rate)
     plt.title('Power spectrogram{}'.format(
