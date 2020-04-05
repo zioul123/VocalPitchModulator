@@ -197,7 +197,7 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, fil
 
     return waveform_istft
 
-def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=128, 
+def ffts_to_mel(ffts, win_length=1024, n_mels=128, 
     n_mfcc=20, skip_mfcc=False, plot=False):
     """Converts a spectrogram to a mel-spectrogram and MFCC.
 
@@ -210,8 +210,6 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=128,
             of freq bin f at frame t.
             The dimensions are (win_length, [number of frames for waveform])
         win_length (int): The size of each window (and corresponding FFT)
-        overlap (float): The amount of overlap between each window. This
-            translates to the hop_length.
         n_mels (int): The number of Mel bands to generate.
         n_mfcc (int): The number of MFCC features to compute.
         skip_mfcc(boolean): If True, do compute the MFCC, as we only want the
@@ -246,7 +244,7 @@ def ffts_to_mel(ffts, win_length=1024, overlap=.5, n_mels=128,
 
     return mel_freq_spec
 
-def simple_fft_pitch_shift(fft, shift_amt):
+def simple_fft_pitch_shift(fft, shift_amt, n_ffts=1024):
     """Takes a single fft vector and shifts all values in the frequency domain.
 
     This is a "naive" pitch shift that simply up-shifts the values in the
@@ -276,19 +274,20 @@ def simple_fft_pitch_shift(fft, shift_amt):
             number of windows used to generate this fft.
         shift_amt (int): The number of semitones to shift the pitch by. The
             expected range is [-15, 15].
+        n_ffts (int): The number of fft bins.
 
     Returns:
         shifted_fft (np.array): A (win_length,) array with the shifted fft.
     """
     assert(-15 <= shift_amt and shift_amt <= 15)
 
-    freqs = librosa.core.fft_frequencies(sample_rate,1024)
+    freqs = librosa.core.fft_frequencies(sample_rate,n_ffts)
     shifted_freqs = freqs * np.power(2, shift_amt/12)
     shifted_fft = np.interp(freqs, shifted_freqs, fft)
 
     return shifted_fft
 
-def simple_ffts_pitch_shift(ffts, shift_amt):
+def simple_ffts_pitch_shift(ffts, shift_amt, n_ffts=1024):
     """Takes a 2D spectrogram, and pitch_shifts each time slice.
 
     Args:
@@ -298,9 +297,10 @@ def simple_ffts_pitch_shift(ffts, shift_amt):
             The dimensions are (win_length, [number of frames for waveform])
         shift_amt (int): The number of semitones to shift the pitch by. The
             expected range is [-15, 15].
+        n_ffts (int): The number of fft bins.
     Returns:
         shifted_ffts (np.ndarray): A spectrogram of equal dimensions to ffts,
             with shifted frequency space.
     """
     assert(-15 <= shift_amt and shift_amt <= 15)
-    return np.array([ simple_fft_pitch_shift(fft, shift_amt) for fft in ffts.T ]).T
+    return np.array([ simple_fft_pitch_shift(fft, shift_amt, n_ffts) for fft in ffts.T ]).T
