@@ -304,3 +304,73 @@ def simple_ffts_pitch_shift(ffts, shift_amt, n_ffts=1024):
     """
     assert(-15 <= shift_amt and shift_amt <= 15)
     return np.array([ simple_fft_pitch_shift(fft, shift_amt, n_ffts) for fft in ffts.T ]).T
+
+def compute_new_sample_rate(base_sample_rate, shift_amt):
+    """Returns a new sample rate based on a pitch shift amount.
+    This is used by resample_wavs.
+    Args:
+        base_sample_rate (int): The original sampling rate
+        shift_amt (int): The number of semitones to pitch shift by.
+    Returns:
+        new_sample_rate (int): The new sampling rate
+        factor (float): The percentage time compression to achieve the increase in pitch
+            specified by shift_amt
+    """
+    factor = 2 ** (-shift_amt/12)
+    new_sample_rate = base_sample_rate * factor
+
+    return new_sample_rate, factor
+
+def resample_wavs(all_wav, shift_amt):
+    """Resamples wav files, which results in pitch shift + time compression/stretch.
+    Args:
+        all_wav (np.ndarray): A 2D matrix such that all_wav[i] provides the ith waveform
+        shift_amt (int): The number of semitones that all wav files should be shifted by.
+    Returns:
+        shifted_wavs (np.ndarray): 2D matrix where each wav in all_wav is resampled.
+    """
+    new_sample_rate, factor = compute_new_sample_rate(sample_rate, shift_amt)
+    shifted_wavs = np.array([librosa.resample(track_wav, sample_rate, new_sample_rate) for track_wav in all_wav])
+    return shifted_wavs
+
+def stretch_wavs(all_wav, shift_amt, overlap, n_ffts=1024):
+    """Stretches wav files by shift_amt. Takes a 2D matrix.
+    Args:
+        all_wav (np.ndarray): A 2D matrix such that all_wav[i] provides the ith waveform
+        shift_amt (int): The number of semitones that all wav files should be shifted by.
+    Returns:
+        all_wavs_stretched (np.ndarray): 2D matrix where each wav in all_wav is stretched.
+    """
+    all_ffts = np.array([ stft(waveform, win_length=n_ffts, overlap=overlap, plot=False) 
+                          for waveform in all_wav ])
+    new_sample_rate, factor = compute_new_sample_rate(sample_rate, int(shift_amt))
+    stretched_ffts = np.array([ librosa.phase_vocoder(ffts, factor, hop_length=compute_hop_length(n_ffts, overlap)) 
+                                for ffts in all_ffts ])
+    all_wavs_stretched = np.array( [ istft(ffts, overlap=overlap, win_length=n_ffts, save_file=False) 
+                                   for ffts in stretched_ffts ])
+    return all_wavs_stretched
+
+def resample_pitch_shift(all_wav, shift_amt, overlap, n_ffts=1024):
+    """Pitch shifts wav files via resampling. Returns both shifted wav and fft data.
+    
+    First, phase_vocoder is used to stretch/compress the wav files, then they are resampled
+    to result in a pitch shift without change in length.
+
+    Args:
+        all_wav (np.ndarray): A 2D matrix such that all_wav[i] provides the ith waveform
+        shift_amt (int): The number of semitones that all wav files should be shifted by.
+        overlap (float): The amount of overlap between each window.
+        n_ffts (int): The number of FFT bins.
+    Returns: 
+        pitch_shifted_data (np.ndarray): 2D matrix where each wav in all_wav is pitched up.
+        pitched_spectra (np.ndarray): 3D matrix where each entry is the STFT of each pitch
+            shifted wav file.
+    """
+    all_stretched_data = stretch_wavs(all_wav, shift_amt, overlap, n_ffts=n_ffts)
+    pitch_shifted_data = resample_wavs(all_stretched_data, shift_amt)
+    pitched_spectra = 
+        (np.array([ stft(waveform, win_length=n_ffts, overlap=overlap, plot=False) 
+                    for waveform in pitch_shifted_data ]))
+    return pitch_shifted_data, pitched_spectra
+
+
