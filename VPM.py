@@ -368,7 +368,7 @@ def resample_pitch_shift(all_wav, shift_amt, overlap, n_ffts=1024):
     """
     all_stretched_data = stretch_wavs(all_wav, shift_amt, overlap, n_ffts=n_ffts)
     pitch_shifted_data = resample_wavs(all_stretched_data, shift_amt)
-    pitched_spectra = 
+    pitched_spectra = \
         (np.array([ stft(waveform, win_length=n_ffts, overlap=overlap, plot=False) 
                     for waveform in pitch_shifted_data ]))
     return pitch_shifted_data, pitched_spectra
