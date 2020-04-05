@@ -26,15 +26,16 @@ class PitchShiftNN(nn.Module):
         super().__init__()
         torch.manual_seed(0)
 
-        self.output  = nn.Linear(n_input, n_output)
+        self.input   = nn.Linear(n_input, n_hid)
+        self.output  = nn.Linear(n_hid, n_output)
         self.relu    = nn.ReLU()
         self.tanh    = nn.Tanh()
 
     def forward(self, x):
-        return self.tanh(self.relu(self.output(x)))
+        h = self.relu(self.input(x))
+        return self.tanh(self.relu(self.output(h)))
 
     def train_func(self, x, y, x_val, y_val, model, opt, loss_fn, epochs=10000, print_graph=False):
-        print(x.shape)
         """Generic function for training a classifier.
         
         Args:
@@ -65,15 +66,18 @@ class PitchShiftNN(nn.Module):
         # Actual training
 
         # Loop with progress bar
-        for epoch in trange(epochs, desc='Training'):
-            opt.zero_grad()
-            y_hat = model(x)  
-            loss = loss_fn(y_hat, y)
-            loss.backward()
-            opt.step()
+        with trange(epochs, desc='Training') as t:
+            for epoch in t:
+                opt.zero_grad()
+                y_hat = model(x)  
+                loss = loss_fn(y_hat, y)
+                loss.backward()
+                opt.step()
             
-            if print_graph:
-                record_loss(loss.item(), 0, 0)
+                t.set_postfix(loss=loss.item())
+
+                if print_graph:
+                    record_loss(loss.item(), 0, 0)
         
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, acc_arr=acc_arr, val_acc_arr=val_acc_arr)
