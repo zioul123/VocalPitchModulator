@@ -141,7 +141,7 @@ def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None)
     plt.figure(figsize=(15, 10))
     plt.plot(loss_arr, 'r-', label='loss')
     if val_loss_arr != None:
-        plt.plot(val_loss_arr, 'm-', label='train accuracy')
+        plt.plot(val_loss_arr, 'm-', label='val loss')
     if acc_arr != None:
         plt.plot(acc_arr, 'b-', label='train accuracy')
     if val_acc_arr != None:

@@ -104,6 +104,7 @@ class TimbreVAE(nn.Module):
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
         self.sigmoid = nn.Sigmoid()
+        self.tanh    = nn.Tanh()
 
     def encode(self, x):
         """Encodes a batch of samples."""
@@ -114,6 +115,8 @@ class TimbreVAE(nn.Module):
         """Decodes a batch of latent variables."""
         h2 = self.relu(self.de1(z))
         return self.sigmoid(self.de2(h2))
+        # Use tanh because we want -1 to 1.
+        # return self.tanh(self.de2(h2))
 
     def reparam(self, mu, logvar):
         """Reparameterization trick to sample z values."""
@@ -156,31 +159,29 @@ class TimbreVAE(nn.Module):
                     for batch_idx in range(n_batches) ]
 
         # Loop with progress bar
-        for epoch in trange(epochs, desc=desc):
-            train_loss = 0
-            total = 0
-            for batch_idx, batch_x in enumerate(batches):
-                opt.zero_grad()
-                recon_x, mu, logvar = model(batch_x)
-                # if (epoch % 10 == 0 and batch_idx == 15):
-                    # print("Batch sample:", batch_x, recon_x)
-                loss = loss_fn(recon_x, batch_x, mu, logvar)
-                loss.backward()
-                train_loss += loss.item()
-                opt.step()
-            # if (epoch % 1000 == 0):
-                # print("Loss:", train_loss / x.shape[0])
-            if print_graph:
-                loss_arr.append(train_loss / x.shape[0])
+        with trange(epochs, desc=desc) as t:
+            for epoch in t:
+                train_loss = 0
+                for batch_idx, batch_x in enumerate(batches):
+                    opt.zero_grad()
+                    recon_x, mu, logvar = model(batch_x)
+                    loss = loss_fn(recon_x, batch_x, mu, logvar)
+                    loss.backward()
+                    train_loss += loss.item()
+                    opt.step()
 
-                # Compute validation loss
-                recon_x, mu, logvar = model(x_val)
-                val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
-                val_loss_arr.append(val_loss / x_val.shape[0])
-                # if (epoch % 1000 == 0):
-                    # print("Val Loss:", val_loss_arr[-1])
-                # print("Loss arr:", loss_arr)
-        
+                if print_graph:
+                    loss_arr.append(train_loss / x.shape[0])
+
+                    # Compute validation loss
+                    recon_x, mu, logvar = model(x_val)
+                    val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
+                    val_loss_arr.append(val_loss / x_val.shape[0])
+                    # if (epoch % 1000 == 0):
+                        # print("Val Loss:", val_loss_arr[-1])
+                    # print("Loss arr:", loss_arr)
+                t.set_postfix(loss=(train_loss / x.shape[0]))
+                
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
 
