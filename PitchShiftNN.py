@@ -26,12 +26,15 @@ class PitchShiftNN(nn.Module):
         super().__init__()
         torch.manual_seed(0)
 
-        self.output  = nn.Linear(n_input, n_output)
+        self.input   = nn.Linear(n_input, n_hid)
+        self.output  = nn.Linear(n_hid, n_output)
         self.relu    = nn.ReLU()
         self.tanh    = nn.Tanh()
+        self.lrelu   = nn.LeakyReLU()
 
     def forward(self, x):
-        return self.tanh(self.relu(self.output(x)))
+        h = self.relu(self.input(x))
+        return self.tanh(self.output(h))
 
     def train_func(self, x, y, x_val, y_val, model, opt, loss_fn, epochs=10000, print_graph=False):
         """Generic function for training a classifier.
