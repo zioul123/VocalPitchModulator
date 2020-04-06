@@ -30,10 +30,11 @@ class PitchShiftNN(nn.Module):
         self.output  = nn.Linear(n_hid, n_output)
         self.relu    = nn.ReLU()
         self.tanh    = nn.Tanh()
+        self.lrelu   = nn.LeakyReLU()
 
     def forward(self, x):
         h = self.relu(self.input(x))
-        return self.tanh(self.relu(self.output(h)))
+        return self.tanh(self.output(h))
 
     def train_func(self, x, y, x_val, y_val, model, opt, loss_fn, epochs=10000, print_graph=False):
         """Generic function for training a classifier.
