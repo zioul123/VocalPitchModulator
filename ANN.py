@@ -114,9 +114,9 @@ class TimbreVAE(nn.Module):
     def decode(self, z):
         """Decodes a batch of latent variables."""
         h2 = self.relu(self.de1(z))
-        return self.sigmoid(self.de2(h2))
+        # return self.sigmoid(self.de2(h2))
         # Use tanh because we want -1 to 1.
-        # return self.tanh(self.de2(h2))
+        return self.tanh(self.de2(h2))
 
     def reparam(self, mu, logvar):
         """Reparameterization trick to sample z values."""
@@ -165,7 +165,8 @@ class TimbreVAE(nn.Module):
                 for batch_idx, batch_x in enumerate(batches):
                     opt.zero_grad()
                     recon_x, mu, logvar = model(batch_x)
-                    loss = loss_fn(recon_x, batch_x, mu, logvar)
+                    # loss = loss_fn(recon_x, batch_x, mu, logvar)
+                    loss = loss_fn(recon_x, batch_x)
                     loss.backward()
                     train_loss += loss.item()
                     opt.step()
@@ -175,19 +176,22 @@ class TimbreVAE(nn.Module):
 
                     # Compute validation loss
                     recon_x, mu, logvar = model(x_val)
-                    val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
+                    val_loss = (loss_fn(recon_x, x_val)).item()
+                    # val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
                     val_loss_arr.append(val_loss / x_val.shape[0])
                     # if (epoch % 1000 == 0):
                         # print("Val Loss:", val_loss_arr[-1])
                     # print("Loss arr:", loss_arr)
                 t.set_postfix(loss=(train_loss / x.shape[0]))
-                
+
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
 
         # Compute validation loss
         recon_x, mu, logvar = model(x_val)
-        val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
+        val_loss = (loss_fn(recon_x, x_val)).item() / x_val.shape[0]
+
+        # val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
         return train_loss / x.shape[0], val_loss
 
 class TimbreMelDecoder(nn.Module):
