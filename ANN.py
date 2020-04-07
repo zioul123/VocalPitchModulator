@@ -192,7 +192,7 @@ class TimbreVAE(nn.Module):
 class TimbreFNN(nn.Module):
     """This neural network attempts to recreate an FFT, given a mel spectrum and mfcc vector"""   
     
-    def __init__(self, n_input=148, n_hid=260, n_hid2=386, n_ffts=513):
+    def __init__(self, n_input=48, n_hid=260, n_hid2=386, n_ffts=513):
         super().__init__()
         torch.manual_seed(0)
         self.n_input  = n_input
@@ -205,7 +205,7 @@ class TimbreFNN(nn.Module):
                                      self.fc2, 
                                      nn.ReLU(), 
                                      self.fc3, 
-                                     nn.ReLU())
+                                     nn.Tanh())
 
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
