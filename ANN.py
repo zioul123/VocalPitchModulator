@@ -284,7 +284,7 @@ class TimbreMelDecoder(nn.Module):
                 loss = loss_fn(y_hat, y)
                 loss.backward()
                 opt.step()
-                t.set_postfix(loss=loss.item())
+                
                 loss_arr.append(loss.item())
                 # ==============
 
@@ -293,6 +293,7 @@ class TimbreMelDecoder(nn.Module):
                     y_hat = model(x_val)
                     val_loss = (loss_fn(y_hat, y_val)).item()
                     val_loss_arr.append(val_loss)
+                    t.set_postfix(loss=val_loss)
         
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
