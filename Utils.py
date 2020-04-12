@@ -107,7 +107,7 @@ def plot_mel_spectrogram(mel_freq_spec, sample_rate, file_name=None):
     S_dB = librosa.power_to_db(mel_freq_spec, ref=np.max)
     librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=sample_rate/2.0)
     plt.colorbar(format='%+2.0f dB')
-    plt.title('Mel-frequency spectrogram')
+    plt.title('Mel-frequency spectrogram of {}'.format(file_name))
     plt.tight_layout()
     plt.show()
 
