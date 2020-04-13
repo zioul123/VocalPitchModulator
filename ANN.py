@@ -201,7 +201,7 @@ class TimbreFNN(nn.Module):
         self.n_input  = n_input
 
         self.fc1     = nn.Linear(n_input, n_hid)
-        self.fc2     = nn.Linear(n_hid, n_ffts)
+        self.fc2     = nn.Linear(n_hid, n_mels)
         self.net     = nn.Sequential(self.fc1, 
                                      nn.ReLU(), 
                                      self.fc2, 
