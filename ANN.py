@@ -104,6 +104,7 @@ class TimbreVAE(nn.Module):
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
         self.sigmoid = nn.Sigmoid()
+        self.tanh    = nn.Tanh()
 
     def encode(self, x):
         """Encodes a batch of samples."""
@@ -287,7 +288,6 @@ class TimbreFNN(nn.Module):
                     y_hat = model(x_val)
                     val_loss = (loss_fn(y_hat, y_val)).item()
                     val_loss_arr.append(val_loss)
-        
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
 
@@ -296,7 +296,6 @@ class TimbreFNN(nn.Module):
         val_loss = (loss_fn(y_hat, y_val)).item()
         return loss_arr[-1], val_loss        
         
-    
 class TimbreMelDecoder(nn.Module):
     """This neural network attempts to recreate an FFT, given a mel spectrum and timbre vector"""
     
