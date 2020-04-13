@@ -107,7 +107,7 @@ def plot_mel_spectrogram(mel_freq_spec, sample_rate, file_name=None):
     S_dB = librosa.power_to_db(mel_freq_spec, ref=np.max)
     librosa.display.specshow(S_dB, x_axis='time', y_axis='mel', sr=sample_rate, fmax=sample_rate/2.0)
     plt.colorbar(format='%+2.0f dB')
-    plt.title('Mel-frequency spectrogram')
+    plt.title('Mel-frequency spectrogram of {}'.format(file_name))
     plt.tight_layout()
     plt.show()
 
@@ -141,7 +141,7 @@ def plot_loss_graph(loss_arr, val_loss_arr=None, acc_arr=None, val_acc_arr=None)
     plt.figure(figsize=(15, 10))
     plt.plot(loss_arr, 'r-', label='loss')
     if val_loss_arr != None:
-        plt.plot(val_loss_arr, 'm-', label='train accuracy')
+        plt.plot(val_loss_arr, 'm-', label='val loss')
     if acc_arr != None:
         plt.plot(acc_arr, 'b-', label='train accuracy')
     if val_acc_arr != None:

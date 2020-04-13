@@ -104,6 +104,7 @@ class TimbreVAE(nn.Module):
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
         self.sigmoid = nn.Sigmoid()
+        self.tanh    = nn.Tanh()
 
     def encode(self, x):
         """Encodes a batch of samples."""
@@ -113,7 +114,9 @@ class TimbreVAE(nn.Module):
     def decode(self, z):
         """Decodes a batch of latent variables."""
         h2 = self.relu(self.de1(z))
-        return self.sigmoid(self.de2(h2))
+        # return self.sigmoid(self.de2(h2))
+        # Use tanh because we want -1 to 1.
+        return self.tanh(self.de2(h2))
 
     def reparam(self, mu, logvar):
         """Reparameterization trick to sample z values."""
@@ -156,56 +159,59 @@ class TimbreVAE(nn.Module):
                     for batch_idx in range(n_batches) ]
 
         # Loop with progress bar
-        for epoch in trange(epochs, desc=desc):
-            train_loss = 0
-            total = 0
-            for batch_idx, batch_x in enumerate(batches):
-                opt.zero_grad()
-                recon_x, mu, logvar = model(batch_x)
-                # if (epoch % 10 == 0 and batch_idx == 15):
-                    # print("Batch sample:", batch_x, recon_x)
-                loss = loss_fn(recon_x, batch_x, mu, logvar)
-                loss.backward()
-                train_loss += loss.item()
-                opt.step()
-            # if (epoch % 1000 == 0):
-                # print("Loss:", train_loss / x.shape[0])
-            if print_graph:
-                loss_arr.append(train_loss / x.shape[0])
+        with trange(epochs, desc=desc) as t:
+            for epoch in t:
+                train_loss = 0
+                for batch_idx, batch_x in enumerate(batches):
+                    opt.zero_grad()
+                    recon_x, mu, logvar = model(batch_x)
+                    # loss = loss_fn(recon_x, batch_x, mu, logvar)
+                    loss = loss_fn(recon_x, batch_x)
+                    loss.backward()
+                    train_loss += loss.item()
+                    opt.step()
 
-                # Compute validation loss
-                recon_x, mu, logvar = model(x_val)
-                val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
-                val_loss_arr.append(val_loss / x_val.shape[0])
-                # if (epoch % 1000 == 0):
-                    # print("Val Loss:", val_loss_arr[-1])
-                # print("Loss arr:", loss_arr)
-        
+                if print_graph:
+                    loss_arr.append(train_loss / x.shape[0])
+
+                    # Compute validation loss
+                    recon_x, mu, logvar = model(x_val)
+                    val_loss = (loss_fn(recon_x, x_val)).item()
+                    # val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item()
+                    val_loss_arr.append(val_loss / x_val.shape[0])
+                    # if (epoch % 1000 == 0):
+                        # print("Val Loss:", val_loss_arr[-1])
+                    # print("Loss arr:", loss_arr)
+                t.set_postfix(loss=(train_loss / x.shape[0]))
+
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)
 
         # Compute validation loss
         recon_x, mu, logvar = model(x_val)
-        val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
+        val_loss = (loss_fn(recon_x, x_val)).item() / x_val.shape[0]
+
+        # val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
         return train_loss / x.shape[0], val_loss
 
 class TimbreMelDecoder(nn.Module):
     """This neural network attempts to recreate an FFT, given a mel spectrum and timbre vector"""
     
-    def __init__(self, n_input=132, n_hid=260, n_hid2=386, n_ffts=513):
+    def __init__(self, n_input=262, n_hid=262, n_output=256):
         super().__init__()
         torch.manual_seed(0)
         self.n_input  = n_input
 
         self.fc1     = nn.Linear(n_input, n_hid)
-        self.fc2     = nn.Linear(n_hid, n_hid2)
-        self.fc3     = nn.Linear(n_hid2, n_ffts)
+        # self.fc2     = nn.Linear(n_hid, n_hid2)
+        self.fc2     = nn.Linear(n_hid, n_output)
+        # self.fc3     = nn.Linear(n_hid2, n_output)
         self.net     = nn.Sequential(self.fc1, 
                                      nn.ReLU(), 
                                      self.fc2, 
-                                     nn.ReLU(), 
-                                     self.fc3, 
-                                     nn.ReLU())
+                                     nn.Tanh()) 
+                                     # self.fc3, 
+                                     # nn.ReLU())
 
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
@@ -273,12 +279,12 @@ class TimbreMelDecoder(nn.Module):
                 # # Non batching
                 opt.zero_grad()
                 y_hat = model(x)
-                if (epoch % 100 == 0):
-                    print(y_hat.cpu().detach().numpy()[0])
+                # if (epoch % 100 == 0):
+                #     print(y_hat.cpu().detach().numpy()[0])
                 loss = loss_fn(y_hat, y)
                 loss.backward()
                 opt.step()
-                t.set_postfix(loss=loss.item())
+                
                 loss_arr.append(loss.item())
                 # ==============
 
@@ -287,6 +293,7 @@ class TimbreMelDecoder(nn.Module):
                     y_hat = model(x_val)
                     val_loss = (loss_fn(y_hat, y_val)).item()
                     val_loss_arr.append(val_loss)
+                    t.set_postfix(loss=val_loss)
         
         if print_graph:
             plot_loss_graph(loss_arr=loss_arr, val_loss_arr=val_loss_arr)

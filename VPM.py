@@ -197,8 +197,7 @@ def istft(ffts, win_length=1024, overlap=.5, window='hann', save_file=False, fil
 
     return waveform_istft
 
-def ffts_to_mel(ffts, win_length=1024, n_mels=128, 
-    n_mfcc=20, skip_mfcc=False, plot=False):
+def ffts_to_mel(ffts, n_mels=128, n_mfcc=20, skip_mfcc=False, plot=False):
     """Converts a spectrogram to a mel-spectrogram and MFCC.
 
     This function is a wrapper for librosa.feature.melspectrogram and
@@ -209,7 +208,6 @@ def ffts_to_mel(ffts, win_length=1024, n_mels=128,
             is the complex number representing the FFT value for the spectrum
             of freq bin f at frame t.
             The dimensions are (win_length, [number of frames for waveform])
-        win_length (int): The size of each window (and corresponding FFT)
         n_mels (int): The number of Mel bands to generate.
         n_mfcc (int): The number of MFCC features to compute.
         skip_mfcc(boolean): If True, do compute the MFCC, as we only want the
