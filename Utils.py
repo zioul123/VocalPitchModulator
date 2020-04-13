@@ -217,6 +217,11 @@ def normalize_rows(mat, norm_mode):
     if norm_mode == NormMode.NEG_ONE_ONE_TO_ZERO_ONE:
         return mat / 2 + 0.5
 
+def normalize(mat, scale_factors=None):
+    normed_mat = mat / np.max(mat)
+    scale_factors = normed_mat[:, 0] / mat[:, 0]
+    return normed_mat, scale_factors
+
 def denormalize_rows(mat, denorm_mode, scale_factors=None):
     """This function denormalizes each row of mat, given an array of scale_factors.
     
