@@ -300,27 +300,27 @@ class TimbreFNN(nn.Module):
 class TimbreMelDecoder(nn.Module):
     """This neural network attempts to recreate an FFT, given a mel spectrum and timbre vector"""
     
-    def __init__(self, n_input=132, n_hid=260, n_hid2=386, n_ffts=513):
+    def __init__(self, n_input=262, n_hid=262, n_output=256):
         super().__init__()
         torch.manual_seed(0)
         self.n_input  = n_input
 
         self.fc1     = nn.Linear(n_input, n_hid)
-        self.fc2     = nn.Linear(n_hid, n_hid2)
-        self.fc3     = nn.Linear(n_hid2, n_ffts)
+        # self.fc2     = nn.Linear(n_hid, n_hid2)
+        self.fc2     = nn.Linear(n_hid, n_output)
+        # self.fc3     = nn.Linear(n_hid2, n_output)
         self.net     = nn.Sequential(self.fc1, 
-                                     nn.Tanh(), 
+                                     nn.ReLU(), 
                                      self.fc2, 
-                                     nn.Tanh(), 
-                                     self.fc3, 
-                                     nn.Tanh())
+                                     nn.Tanh()) 
+                                     # self.fc3, 
+                                     # nn.ReLU())
 
         self.relu    = nn.ReLU()
         self.Softmax = nn.Softmax()
         self.sigmoid = nn.Sigmoid()
         self.tanh    = nn.Tanh()
-    
-    
+
     def forward(self, X):
         return self.net(X)
 
@@ -405,3 +405,4 @@ class TimbreMelDecoder(nn.Module):
         y_hat = model(x_val)
         val_loss = (loss_fn(y_hat, y_val)).item()
         return loss_arr[-1], val_loss
+
