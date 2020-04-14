@@ -274,8 +274,8 @@ class TimbreFNN(nn.Module):
                 # # Non batching
                 opt.zero_grad()
                 y_hat = model(x)
-                if (epoch % 100 == 0):
-                    print(y_hat.cpu().detach().numpy()[0])
+                # if (epoch % 100 == 0):
+                #     print(y_hat.cpu().detach().numpy()[0])
                 loss = loss_fn(y_hat, y)
                 loss.backward()
                 opt.step()
