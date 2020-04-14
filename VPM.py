@@ -118,7 +118,8 @@ def load_wav_files(rel_path, data_list):
     for idx, file_path in enumerate(data_list):
         assert(file_path[-4:] == '.wav')
         s_r, short_data = sio.wavfile.read(os.path.join(rel_path,file_path))
-        assert(s_r == sample_rate)
+        if (s_r != sample_rate):
+            print("Please resample to 44100Hz for better results, but continuing regardless...");
         # Make it mono if it's stereo
         if len(short_data.shape) == 2 and short_data.shape[1] == 2:
             short_data = short_data[:, 0]
@@ -370,5 +371,3 @@ def resample_pitch_shift(all_wav, shift_amt, overlap, n_ffts=1024):
         (np.array([ stft(waveform, win_length=n_ffts, overlap=overlap, plot=False) 
                     for waveform in pitch_shifted_data ]))
     return pitch_shifted_data, pitched_spectra
-
-
