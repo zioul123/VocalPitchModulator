@@ -11,10 +11,10 @@ def load_wav_file_from_stdin():
 
     filename = input("Enter the filename including the .wav extension: ")
     return load_wav_file(filename)
-    
-    
+
+
 def load_wav_file(filename):
-    
+
     filenameList = [filename]
 
     all_wav_data = VPM.load_wav_files("./", filenameList)
@@ -30,7 +30,7 @@ def record_wav_file():
     sample_format = pyaudio.paInt16  # 16 bits per sample
     channels = 1
     fs = 44100  # Record at 44100 samples per second
-    seconds = 7
+    seconds = 5
 
     p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
@@ -49,7 +49,7 @@ def record_wav_file():
         data = stream.read(chunk)
         frames.append(data)
 
-    # Stop and close the stream 
+    # Stop and close the stream
     stream.stop_stream()
     stream.close()
     p.terminate()
@@ -69,7 +69,7 @@ def record_wav_file():
 
 
 def save_wav_file(file):
-    
+
     filename = input("Enter the filename including the .wav extension: ")
     librosa.output.write_wav('output_wav/' + filename, file, 44100)
 
