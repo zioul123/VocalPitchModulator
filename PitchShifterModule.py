@@ -41,7 +41,7 @@ def loadModels(modelsDirectory="model_data\\VPMModel"):
 
             # Hardcoded settings here
             model = TimbreFNN(n_input=512, n_hid=512, n_mels=256)
-            model.load_state_dict(torch.load(os.path.join(modelsDirectory, path)))
+            model.load_state_dict(torch.load(os.path.join(modelsDirectory, path), map_location=torch.device('cpu')))
             model.eval()
 
             models.append(model)
