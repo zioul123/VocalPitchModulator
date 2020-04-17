@@ -30,7 +30,8 @@ The following is the proposed modulation pipeline:
 Image 1: Overall Vocal Pitch Modulation System Design
 
 Please refer to [Vocal Pitch Modulation Audio and Waveform presentation]() page to listen to our reconstructed results for each methods and experiments we took.
-#### The above System Design includes 4 stages:
+
+### The above System Design includes 4 stages:
 #### 1. Pre-processing Stage
 As seen in Image 1, pre-processing stage converts audio wav file, apply STFT function and create either STFT, Mel-spectrum or MFCC to be used for further processing.
 This stage also includes data and pitch pairing for ANN Training which will be further shown in stage 3.
@@ -42,16 +43,16 @@ As seen in Image 1, pitch shift takes into the mel-spectrum, train and output th
 ##### Proposed Architecture 0
 ![architecture0.png](/Documentation/Figures/architecture0.png)
 ##### Proposed Architecture 1
-![architecture0.png](/Documentation/Figures/architecture1.png)
+![architecture1.png](/Documentation/Figures/architecture1.png)
 ##### Proposed Architecture 2
-![architecture0.png](/Documentation/Figures/architecture2.png)
+![architecture2.png](/Documentation/Figures/architecture2.png)
 
 Architecture 2 has an additional Timbre Encoder ANN and the pipline is as follows:
 ![Encoder Training Pipeline](/Documentation/Figures/Timbre-Enc_Training.png)
 ![TimbreVAE Training Pipeline](/Documentation/Figures/Timbre-VAE_Training.png)
 
 ##### Proposed Architecture 3
-![architecture0.png](/Documentation/Figures/architecture3.png)
+![architecture3.png](/Documentation/Figures/architecture3.png)
 
 
 #### 4. Post-processing stage
@@ -68,3 +69,14 @@ The following image is the vowel diagram we followed for dataset collection.
 The following are additional aids which illustrates the organization of our data.
 ![Data List](/Documentation/Figures/Data_List.png)  
 ![Data-Label Pairs](/Documentation/Figures/Data-Label_Pairs.png)
+
+## Acknowledgments
+Thank you to CS4347 Sound and Music Computing Prof Wanye and WeiWei.
+
+Big thanks to Vocal Pitch Modulation Team 13: <br/>
++ Louiz-Kim
++ [Rachel Tan](www.gitub.com/racheltanxueqi)
++ Zachary Feng
++ Shaun Goh
+
+[Yin-Jyun Luo and team's](https://arxiv.org/pdf/1906.08152.pdf) work has greatly gave us huge inspiration to get started.
