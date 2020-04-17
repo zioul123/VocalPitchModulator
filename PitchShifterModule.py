@@ -138,7 +138,7 @@ def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False
         wav_denorm_mels.T, sr=sr, n_fft=n_ffts,
         hop_length=compute_hop_length(n_ffts, overlap),
         win_length=n_ffts)
-    if not getPureShift:
+    if getPureShift:
         return np.array(gl_abs_waveform, dtype=np.float32), np.array(shifted_wav, dtype=np.float32)
     else:
         return np.array(gl_abs_waveform, dtype=np.float32)
