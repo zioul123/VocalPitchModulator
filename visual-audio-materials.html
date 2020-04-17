@@ -13215,19 +13215,19 @@ GL on Abs(Pitch shifted STFT)
 <b>-> Using 2048, 0.75, Cat-C3, +5</b>
 GL on Abs(STFT)
 <audio controls="controls" >
-    <source src="many_expts/pre and post processing methods results/ISTFT cat C3 1024 0.5.wav" type="audio/wav" />
+    <source src="many_expts/pitch shift methods results/ISTFT cat C3 2048 0.75.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
 GL on Abs(Expected STFT) (the label)
 <audio controls="controls" >
-    <source src="many_expts/pre and post processing methods results/ISTFT cat C3 1024 0.75.wav" type="audio/wav" />
+    <source src="many_expts/pitch shift methods results/GL(ABS(Expected)) cat F3 2048 0.75.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
 GL on Abs(Pitch shifted STFT)
 <audio controls="controls" >
-    <source src="many_expts/pre and post processing methods results/ISTFT(ABS) cat C3 1024 0.5.wav" type="audio/wav" />
+    <source src="many_expts/pitch shift methods results/GL(ABS(+5)) cat C3 2048 0.75.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 </pre><br>
@@ -13261,9 +13261,6 @@ Indistinguishable to the above's resample then stretch audio but the spectra of 
 
 		</div>
 		</div>
-
-		
-
 		<div class="cell border-box-sizing text_cell rendered">
 			<div class="prompt input_prompt"></div>
 			<div class="inner_cell">
@@ -13282,18 +13279,16 @@ Indistinguishable to the above's resample then stretch audio but the spectra of 
 		    <div class="prompt"></div>
 
 		<div class="output_subarea output_stream output_stdout text_cell_render">
-			<h2> Training results</h2>
-
-<b><u> Example 1: Up pitch from Db3 to E3</u> </b>
+<b><u> Example 1: Up pitch from E3 to G3</u> </b>
 <pre><span class="ansi-bold">Original audio file (original)</span>
 <audio controls="controls" >
-    <source src="Data/dataset/0_9-nut_4-Db3.wav" type="audio/wav" />
+    <source src="Data/dataset/0_9-nut_7-E3.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
 <pre><span class="ansi-bold">Expected pitch shifted audio file</span>
 <audio controls="controls" >
-    <source src="Data/dataset/0_9-nut_7-E3.wav" type="audio/wav" />
+    <source src="Data/dataset/0_9-nut_10-G3.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
@@ -13370,43 +13365,91 @@ Indistinguishable to the above's resample then stretch audio but the spectra of 
     <source src="many_expts/ANN Architecture results/['0_5-dog_7-E3.wav']_Archi-3_Decoded_[-3].wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
-</pre>
+</pre></div></div>
 
-			<h2> Testing results</h2>
-<pre><span class="ansi-bold">Test audio file (original)</span>
+<div class="cell border-box-sizing text_cell rendered">
+			<div class="prompt input_prompt"></div>
+			<div class="inner_cell">
+				<div class="text_cell_render border-box-sizing rendered_html">
+					<p><h3>4. Our Product Demonstration (Testing Results of ANN Training)</h3><br>
+						In this section, we complement our Final Report Section 4.5 and 5.2 with the following reconstruction results. <br>
+				</div>
+			</div>
+		</div>
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+
+    <div class="prompt"></div>
+		<div class="output_subarea output_stream output_stdout text_cell_render">
+<pre><h2><u>Speech Demo</u> </h2><span class="ansi-bold">Original audio file</span>
 <audio controls="controls" >
-    <source src="many_expts/ANN Architecture results/scale.wav" type="audio/wav" />
+    <source src="many_expts/ANN Architecture results/Orig_QuickBrownFox.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
+<b>For the following, shift pitch up by 3:</b><br/>
 <pre><span class="ansi-bold">Using conventional pitch shift (loss of realism)</span>
 <audio controls="controls" >
-    <source src="many_expts/ANN Architecture results/['scale.wav']_PureShift_[4].wav" type="audio/wav" />
+    <source src="many_expts/ANN Architecture results/Pure+3_QuickBrownFox.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
 <pre><span class="ansi-bold">Using Architecture 0 [Chosen one]</span>
 <audio controls="controls" >
-    <source src="many_expts/ANN Architecture results/['scale.wav']_Archi-0_Decoded_[4].wav" type="audio/wav" />
+    <source src="many_expts/ANN Architecture results/Archi-0_[+3]QuickBrownFox.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 
 <pre><span class="ansi-bold">Using Architecture 1</span>
-No Result
+No Result.
 
 <pre><span class="ansi-bold">Using Architecture 2</span>
-No Result
+No results.
 
 <pre><span class="ansi-bold">Using Architecture 3</span>
 <audio controls="controls" >
-    <source src="many_expts/ANN Architecture results/['scale.wav']_Archi-3_Decoded_[4].wav" type="audio/wav" />
+    <source src="many_expts/ANN Architecture results/Archi-3_[+3]QuickBrownFox.wav" type="audio/wav" />
+    Your browser does not support the audio element.
+</audio>
+</pre>
+<pre><h2><u>Singing Demo </u></h2><span class="ansi-bold">Original audio file</span>
+<audio controls="controls" >
+    <source src="many_expts/ANN Architecture results/orig_scale.wav" type="audio/wav" />
+    Your browser does not support the audio element.
+</audio>
+
+<b>For the following, shift pitch up by 3:</b><br/>
+
+<pre><span class="ansi-bold">Using conventional pitch shift (loss of realism)</span>
+<audio controls="controls" >
+    <source src="many_expts/ANN Architecture results/Pure+3_scale.wav" type="audio/wav" />
+    Your browser does not support the audio element.
+</audio>
+
+<pre><span class="ansi-bold">Using Architecture 0 </span>
+<audio controls="controls" >
+    <source src="many_expts/ANN Architecture results/Archi-0_[+3]scale.wav" type="audio/wav" />
+    Your browser does not support the audio element.
+</audio>
+
+<pre><span class="ansi-bold">Using Architecture 1</span>
+No Result.
+
+<pre><span class="ansi-bold">Using Architecture 2</span>
+No Result.
+
+<pre><span class="ansi-bold">Using Architecture 3 [Chosen one]</span>
+<audio controls="controls" >
+    <source src="many_expts/ANN Architecture results/Archi-3_[+3]scale.wav" type="audio/wav" />
     Your browser does not support the audio element.
 </audio>
 </pre>
 
-		</div>
-		</div>
-
+	</div>
+	</div>
 		
 	</body>
 	</body>
