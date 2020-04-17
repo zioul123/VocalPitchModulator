@@ -1,0 +1,2 @@
+Index,Pitch Shift Amt,Max Mels,Path
+10,5,22.308287,Archi-1_[GE]-_epoch5_5000_296_296.pt
