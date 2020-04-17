@@ -17,8 +17,15 @@ from Utils import *
 from VPM import *
 from ANN import *
 
-# Hardcoded data - information used based on architecture.
+# Hardcoded data
+n_ffts = 2048; overlap = 0.75; n_mels = 256; global_max_mels = 18.21612;
+global_max_mfcc = 9.774869; global_max_timbre = 3.7099004; sr = 44100;
+maxMelsGeneral = [ 32.550102, 32.25072, 32.205074, 31.656128, 31.714958, 18.21612,
+                   19.796812, 21.5951, 21.045912, 19.812326, 22.308287 ]
+
+# Information used based on architecture.
 paths = [ "Archi-0_ModelInfo.txt", "Archi-1_ModelInfo.txt", "Archi-2_ModelInfo.txt", "Archi-3_ModelInfo.txt" ]
+pathsGeneral = [ "Archi-0_ModelInfoGeneral.txt", "Archi-1_ModelInfoGeneral.txt", "Archi-2_ModelInfoGeneral.txt", "Archi-3_ModelInfoGeneral.txt" ]
 n_inputs = [ 256, 296, 266, 512 ]
 nhids =  [ 256, 296, 266, 512 ]
 
@@ -28,7 +35,7 @@ TE = TimbreVAE(n_mfcc=40, n_hid=36, n_timb=10)
 TE.load_state_dict(torch.load(TE_path, map_location=torch.device('cpu')))
 TE.eval()
 
-def loadModels(archi = 3, modelsDirectory="model_data\\VPMModel"):
+def loadModels(archi = 3, modelsDirectory="model_data\\VPMModel", general=False):
     """Load the models from the given model info directory.
     Returns a tuple - the models, as well as the max mels used to normalize.
     Args:
@@ -41,15 +48,14 @@ def loadModels(archi = 3, modelsDirectory="model_data\\VPMModel"):
                     - <.pt models>
     Returns:
         models (list): A list of pytorch models.
-        np.array (len(models)): the normalizing factor used for each model.
     """
-    models = []; maxMels = []
-    with open(os.path.join(modelsDirectory, paths[archi]), 'r', newline='') as f:
+    models = []
+    specifiedPath = os.path.join(modelsDirectory, pathsGeneral[archi] if general else paths[archi])
+    with open(specifiedPath, 'r', newline='') as f:
         reader = csv.reader(f, delimiter=',')
         for idx, row in enumerate(reader):
             if idx == 0: continue
             _, shiftAmt, maxMel, path = row
-            maxMels.append(maxMel)
 
             # Hardcoded settings here
             model = BaseFFN(n_input=n_inputs[archi], n_hid=nhids[archi], n_output=256)
@@ -57,10 +63,10 @@ def loadModels(archi = 3, modelsDirectory="model_data\\VPMModel"):
             model.eval()
 
             models.append(model)
-    return models, np.array(maxMels, dtype=np.float32);
+    return models
 
-def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False):
-    """Perform the pitch shift, using the models and maxMels array provided.
+def pitchShift(mode, models, wavform, pitchShiftAmt, getPureShift=False):
+    """Perform the pitch shift, using the models provided.
     Args:
         mode (int): Which architecture to use
         models (list): A list of pytorch models.
@@ -71,12 +77,10 @@ def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False
         gl_abs_waveform (np.array): The shifted wav file put through the decoder
         shifted_wav (np.array): The purely shifted wav file
     """
-    n_ffts = 2048; overlap = 0.75; n_mels = 256; global_max_mels = 18.21612; global_max_mfcc = 9.774869; global_max_timbre = 3.7099004
-    sr = 44100
 
     pitchShiftAmt = int(pitchShiftAmt)
     assert (-5 <= pitchShiftAmt and pitchShiftAmt <= 5)
-    modelIdx = pitchShiftAmt + 5
+    shiftIdx = pitchShiftAmt + 5
 
     spectrogram = stft(wavform, win_length=n_ffts, overlap=overlap, plot=False)
 
@@ -106,7 +110,7 @@ def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False
     shifted_wav_mels_prenorm = ffts_to_mel(shifted_spectrogram, n_mels=n_mels, skip_mfcc=True)
     shifted_wav_mels_prenorm = shifted_wav_mels_prenorm.T
     shifted_wav_mels_logged = np.log(shifted_wav_mels_prenorm)
-    shifted_wav_mels = shifted_wav_mels_logged / maxMels[modelIdx]
+    shifted_wav_mels = shifted_wav_mels_logged / maxMelsGeneral[shiftIdx]
 
     # Truncate excess windows if off by a few
     # print("Shapes: Orig: {}, Shifted: {}".format(wav_mels.shape, shifted_wav_mels.shape))
@@ -119,7 +123,7 @@ def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False
         if mode == 2:
             wav_timbre = wav_timbre[0:shifted_wav_mels.shape[0]]
 
-    model = models[modelIdx]
+    model = models[0] if len(models) == 1 else models[shiftIdx]
 
     if (mode == 0):
         wav_input = torch.tensor(wav_mels).float()
@@ -144,12 +148,22 @@ def pitchShift(mode, models, maxMels, wavform, pitchShiftAmt, getPureShift=False
         return np.array(gl_abs_waveform, dtype=np.float32)
 
 # The wrapper functions
-modelss, maxMelss = zip(*[ loadModels(archi, os.path.join("model_data", "VPMModel")) for archi in range(4) ])
+modelss = [ loadModels(archi, os.path.join("model_data", "VPMModel")) for archi in range(4) ]
 
-PitchShift0 = lambda wavform, pitchShiftAmt: pitchShift(0, modelss[0], maxMelss[0], wavform, pitchShiftAmt)
-PitchShift1 = lambda wavform, pitchShiftAmt: pitchShift(1, modelss[1], maxMelss[1], wavform, pitchShiftAmt)
-PitchShift2 = lambda wavform, pitchShiftAmt: pitchShift(2, modelss[2], maxMelss[2], wavform, pitchShiftAmt)
-PitchShift3 = lambda wavform, pitchShiftAmt: pitchShift(3, modelss[3], maxMelss[3], wavform, pitchShiftAmt)
+# These use the NN's trained on a single pitch shift
+PitchShift0 = lambda wavform, pitchShiftAmt: pitchShift(0, modelss[0], wavform, pitchShiftAmt)
+PitchShift1 = lambda wavform, pitchShiftAmt: pitchShift(1, modelss[1], wavform, pitchShiftAmt)
+PitchShift2 = lambda wavform, pitchShiftAmt: pitchShift(2, modelss[2], wavform, pitchShiftAmt)
+PitchShift3 = lambda wavform, pitchShiftAmt: pitchShift(3, modelss[3], wavform, pitchShiftAmt)
 
-# Recommended is identical to PitchShift0
-PitchShift = lambda wavform, pitchShiftAmt: pitchShift(0, modelss[0], maxMelss[0], wavform, pitchShiftAmt)
+# General models
+modelsGeneral = [ loadModels(archi, os.path.join("model_data", "VPMModel"), True) for archi in range(4) ]
+
+# These use the NN's trained on a 10 different pitch shifts (and identity)
+PitchShiftGen0 = lambda wavform, pitchShiftAmt: pitchShift(0, modelsGeneral[0], wavform, pitchShiftAmt)
+PitchShiftGen1 = lambda wavform, pitchShiftAmt: pitchShift(1, modelsGeneral[1], wavform, pitchShiftAmt)
+PitchShiftGen2 = lambda wavform, pitchShiftAmt: pitchShift(2, modelsGeneral[2], wavform, pitchShiftAmt)
+PitchShiftGen3 = lambda wavform, pitchShiftAmt: pitchShift(3, modelsGeneral[3], wavform, pitchShiftAmt)
+
+# Recommended is Architecture 3
+PitchShift = lambda wavform, pitchShiftAmt: pitchShift(3, modelsGeneral[3], wavform, pitchShiftAmt)
