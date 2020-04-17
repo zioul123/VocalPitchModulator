@@ -192,7 +192,7 @@ class TimbreVAE(nn.Module):
         # val_loss = (loss_fn(recon_x, x_val, mu, logvar)).item() / x_val.shape[0]
         return train_loss / x.shape[0], val_loss
 
-class TimbreFNN(nn.Module):
+class BaseFFN(nn.Module):
     """This neural network is a simple feed forward neural network with one hidden layer."""
 
     def __init__(self, n_input=262, n_hid=262, n_output=256):
@@ -257,6 +257,6 @@ class TimbreFNN(nn.Module):
         return loss_arr[-1], val_loss
 
 # Aliases
-TimbreMelDecoder = TimbreFNN
-PitchShiftNN = TimbreFNN
-BaseFFN = TimbreFNN
+TimbreMelDecoder = BaseFFN
+PitchShiftNN = BaseFFN
+TimbreFNN = BaseFFN
