@@ -71,7 +71,7 @@ The following are additional aids which illustrates the organization of our data
 ![Data-Label Pairs](/Documentation/Figures/Data-Label_Pairs.png)
 
 ## Acknowledgments
-Thank you to CS4347 Sound and Music Computing Prof Wanye and WeiWei.
+Thank you to CS4347 Sound and Music Computing Prof Wang Ye and Wei Wei.
 
 Big thanks to Vocal Pitch Modulation Team 13: <br/>
 + Louiz-Kim
